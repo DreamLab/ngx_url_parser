@@ -80,7 +80,7 @@ typedef struct {
 #define NGX_URL_INVALID 0
 #define NGX_URL_OK 1
 
-int ngx_url_parser(ngx_http_url *r, const char *b);
+extern int ngx_url_parser(ngx_http_url *r, const char *b);
 
-int ngx_url_free(ngx_http_url * url);
+extern int ngx_url_free(ngx_http_url * url);
 #endif
