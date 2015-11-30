@@ -1,12 +1,10 @@
 language:
     - cpp
-install:
-    - sudo apt-get install libgtest-dev
 sudo: false
 addons:
     apt:
         packages:
-            - libgtest-dev
+        - libgtest-dev
 script:
     - make
     - ./unit_tests
