@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2002-2015 Igor Sysoev
  * Copyright (C) 2011-2015 Nginx, Inc.
+ * Copyright (C) 2015 Marcin Kaciuba
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -85,6 +86,7 @@ inline void copy_from_meta(char **dest, const char * start, const char * end) {
     *dest = (char*)malloc(size);
     memcpy((void*)*dest, start, size - 1);
     (*dest)[size - 1] = '\0';
+
 }
 
 int ngx_url_parser(ngx_http_url * url, const char *b) {
@@ -97,19 +99,20 @@ int ngx_url_parser(ngx_http_url * url, const char *b) {
     if (status != NGX_URL_OK) {
         return status;
     }
-    status = NGX_URL_INVALID;
+
+    status = 0;
 
     if (meta.schema_end) {
-        status = NGX_URL_OK;
         copy_from_meta(&(url->schema), meta.url_start, meta.schema_end);
+        status++;
     }
 
-    if (meta.host_end) {
+    if (meta.host_end && meta.host_end - meta.host_start > 0) {
         copy_from_meta(&url->host, meta.host_start, meta.host_end);
-        status = NGX_URL_OK;
+        status++;
     }
 
-    if (meta.uri_end) {
+    if (meta.uri_start) {
         if (meta.args_start) {
             copy_from_meta(&url->path, meta.uri_start, meta.args_start - 1);
         } else if (meta.fragment_start) {
@@ -118,7 +121,6 @@ int ngx_url_parser(ngx_http_url * url, const char *b) {
             copy_from_meta(&url->path, meta.uri_start, meta.url_end);
         }
 
-        status = NGX_URL_OK;
     }
 
     if (meta.args_start) {
@@ -128,26 +130,33 @@ int ngx_url_parser(ngx_http_url * url, const char *b) {
         } else {
             copy_from_meta(&url->query, meta.args_start, meta.url_end);
         }
-        status = NGX_URL_OK;
     } else if (meta.fragment_start) {
         copy_from_meta(&url->fragment, meta.fragment_start, meta.url_end);
     }
 
     if (meta.port_end) {
+
+        if (meta.host_end + 1 == meta.port_end) {
+            return NGX_URL_INVALID;
+        }
+
         // +1 skip ":"
         copy_from_meta(&url->port, meta.host_end + 1, meta.port_end);
-        status = NGX_URL_OK;
     }
 
     if (meta.userpass_end) {
         copy_from_meta(&url->userpass, meta.userpass_start, meta.userpass_end);
-        status = NGX_URL_OK;
     }
 
-    return status;
+    if (status == 2) {
+        return NGX_URL_OK;
+    }
+
+    return NGX_URL_INVALID;
 }
 
 int ngx_url_free(ngx_http_url * url) {
+
     if (url->schema != NULL) {
         free((void*)url->schema);
     }
@@ -187,10 +196,6 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b)
 
     for (p = b; p != '\0'; p++) {
         ch = *p;
-
-        #ifdef NGX_DEBUG
-            printf("%c", ch);
-        #endif
 
         switch (state) {
 
@@ -282,10 +287,11 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b)
             case '?':
                 r->args_start = p + 1;
                 state = sw_uri;
-            break;
+                break;
             case '#':
                 r->fragment_start = p + 1;
-                state = sw_after_slash_in_uri;
+                state = sw_uri;
+                break;
             case '\0':
                 goto done;
             default:
@@ -438,7 +444,6 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b)
             if (usual[ch >> 5] & (1 << (ch & 0x1f))) {
                 break;
             }
-
             switch (ch) {
             case '\0':
                 r->uri_end = p;
@@ -467,8 +472,6 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b)
     return NGX_URL_INVALID;
 
 done:
-
-
     if (r->url_end == NULL) {
         r->url_end = p;
     }
@@ -477,6 +480,3 @@ done:
 
     return NGX_URL_OK;
 }
-
-
-
