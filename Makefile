@@ -17,7 +17,7 @@ obj/example.o: example.c
 example: obj/ngx_url_parser.o obj/example.o
 	$(CC) $^ -o $@
 
-test: ngx_url_parser.c tests/ngx_url_parser_test.c tests/main.cpp
+test: ngx_url_parser.c tests/ngx_url_parser_test.cpp tests/main.cpp
 	$(CXX)  -lgtest -lpthread $^ -o unit_tests
 
 clean:

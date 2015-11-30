@@ -120,6 +120,23 @@ TEST(ngx_url_parser, UrlWithPath) {
     ngx_url_free(&url);
 }
 
+TEST(ngx_url_parser, UrlWithPath2) {
+    const char * str = "http://mkaciuba.pl/X";
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+
+    ASSERT_EQ(NGX_URL_OK, status);
+    ASSERT_STREQ(url.host, "mkaciuba.pl");
+    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.port, NULL);
+    ASSERT_STREQ(url.path, "/X");
+    ASSERT_STREQ(url.query, NULL);
+    ASSERT_STREQ(url.fragment, NULL);
+    ASSERT_STREQ(url.userpass, NULL);
+
+    ngx_url_free(&url);
+}
+
 TEST(ngx_url_parser, UrlWithPathAndQuery) {
     const char * str = "http://mkaciuba.pl/?a=2&b[]=1";
     ngx_http_url url;
