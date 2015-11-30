@@ -431,8 +431,8 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b)
                 r->fragment_start = p + 1;
                 state = sw_uri;
                 break;
-            case '\0':
-                return NGX_URL_INVALID;
+            /* case '\0': */
+            /*     return NGX_URL_INVALID; */
             }
             break;
 
