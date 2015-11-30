@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/Aldor007/ngx_url_parser.svg)](https://travis-ci.org/Aldor007/ngx_url_parser)
+
 ngx_url_parser
 ==============
 Yet anothor url parser, written in C.
