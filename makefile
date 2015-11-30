@@ -5,11 +5,12 @@ all: example static-lib test
 
 obj/ngx_url_parser.o: ngx_url_parser.c
 	mkdir -p obj
-	$(CC) -I. -o $@ -c $^
+	$(CC) -fPIC -I. -o $@ -c $^ 
 
 static-lib: obj/ngx_url_parser.o
 	mkdir -p lib 
-	ar rcs lib/libngx_url_parser.a $^
+	ar -rcs lib/libngx_url_parser.a $^
+	ranlib lib/libngx_url_parser.a
 
 obj/example.o: example.c
 	$(CC) -o $@ -c $^
