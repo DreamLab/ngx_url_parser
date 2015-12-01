@@ -193,8 +193,10 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b)
 
     sw_state state = sw_schema;
 
+    int len = strlen(b);
+    int counter = 0;
 
-    for (p = b; p != '\0'; p++) {
+    for (p = b; p != '\0'; p++, counter++) {
         ch = *p;
 
         switch (state) {
@@ -285,11 +287,15 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b)
                 state = sw_after_slash_in_uri;
                 break;
             case '?':
-                r->args_start = p + 1;
+                if (counter <= len) {
+                    r->args_start = p + 1;
+                }
                 state = sw_uri;
                 break;
             case '#':
-                r->fragment_start = p + 1;
+                if (counter <= len) {
+                    r->fragment_start = p + 1;
+                }
                 state = sw_uri;
                 break;
             case '\0':
@@ -392,11 +398,15 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b)
                 break;
             case '?':
                 r->uri_end = p - 1;
-                r->args_start = p + 1;
+                if (counter <= len) {
+                    r->args_start = p + 1;
+                }
                 state = sw_uri;
                 break;
             case '#':
-                r->fragment_start = p + 1;
+                if (counter <= len) {
+                    r->fragment_start = p + 1;
+                }
                 state = sw_uri;
                 break;
             case '+':
@@ -424,11 +434,15 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b)
                 state = sw_uri;
                 break;
             case '?':
-                r->args_start = p + 1;
+                if (counter <= len) {
+                    r->args_start = p + 1;
+                }
                 state = sw_uri;
                 break;
             case '#':
-                r->fragment_start = p + 1;
+                if (counter <= len) {
+                    r->fragment_start = p + 1;
+                }
                 state = sw_uri;
                 break;
             /* case '\0': */
@@ -449,7 +463,9 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b)
                 r->uri_end = p;
                 goto done;
             case '#':
-                r->fragment_start = p + 1;
+                if (counter <= len) {
+                    r->fragment_start = p + 1;
+                }
                 break;
             }
             break;
