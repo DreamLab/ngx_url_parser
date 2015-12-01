@@ -13,6 +13,14 @@ TEST(ngx_url_parser, IncorrectUrl) {
     ASSERT_EQ(NGX_URL_INVALID, status);
 }
 
+TEST(ngx_url_parser, IncorrectUrlNoHost) {
+    const char * str = "https:///a";
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+    ngx_url_free(&url);
+    ASSERT_EQ(NGX_URL_INVALID, status);
+}
+
 TEST(ngx_url_parser, IncorrectUrl2) {
     const char * str = "";
     ngx_http_url url;
@@ -341,6 +349,38 @@ TEST(ngx_url_parser, UrlWithAllParameters) {
     ASSERT_STREQ(url.fragment, "abc");
     ASSERT_STREQ(url.query, "cbf");
     ASSERT_STREQ(url.userpass, "a:pw");
+
+    ngx_url_free(&url);
+}
+
+TEST(ngx_url_parser, OnlyPath) {
+
+    const char * str = "/a/b?x=y#test";
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+
+    ASSERT_EQ(NGX_URL_OK, status);
+    ASSERT_STREQ(url.host, NULL);
+    ASSERT_STREQ(url.schema, NULL);
+    ASSERT_STREQ(url.path, "/a/b");
+    ASSERT_STREQ(url.fragment, "test");
+    ASSERT_STREQ(url.query, "x=y");
+
+    ngx_url_free(&url);
+}
+
+TEST(ngx_url_parser, OnlyPath2) {
+
+    const char * str = "/a.txt";
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+
+    ASSERT_EQ(NGX_URL_OK, status);
+    ASSERT_STREQ(url.host, NULL);
+    ASSERT_STREQ(url.schema, NULL);
+    ASSERT_STREQ(url.path, "/a.txt");
+    ASSERT_STREQ(url.fragment, NULL);
+    ASSERT_STREQ(url.query, NULL);
 
     ngx_url_free(&url);
 }

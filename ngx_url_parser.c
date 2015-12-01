@@ -97,6 +97,9 @@ int ngx_url_parser(ngx_http_url * url, const char *b) {
     int status = ngx_url_parser_meta(&meta, b);
 
     if (status != NGX_URL_OK) {
+    #ifdef NGX_DEBUG
+        printf("Wrong status from meta!");
+    #endif
         return status;
     }
 
@@ -120,6 +123,7 @@ int ngx_url_parser(ngx_http_url * url, const char *b) {
         } else {
             copy_from_meta(&url->path, meta.uri_start, meta.url_end);
         }
+        status += 5;
 
     }
 
@@ -148,7 +152,7 @@ int ngx_url_parser(ngx_http_url * url, const char *b) {
         copy_from_meta(&url->userpass, meta.userpass_start, meta.userpass_end);
     }
 
-    if (status == 2) {
+    if (status == 2 || status == 7 || status == 5) {
         return NGX_URL_OK;
     }
 
@@ -212,6 +216,10 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b)
             case ':':
                 r->schema_end = p;
                 state = sw_schema_slash;
+                break;
+            case '/':
+                state = sw_after_slash_in_uri;
+                r->uri_start = p;
                 break;
             default:
                 #ifdef NGX_DEBUG
@@ -491,8 +499,6 @@ done:
     if (r->url_end == NULL) {
         r->url_end = p;
     }
-
-    r->state = sw_schema;
 
     return NGX_URL_OK;
 }

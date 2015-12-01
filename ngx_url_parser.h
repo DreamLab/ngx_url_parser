@@ -59,8 +59,6 @@ typedef struct {
     const char * fragment_start;
     const char * port_end;
 
-    sw_state state;
-
 } ngx_http_url_meta ;
 
 typedef struct {
