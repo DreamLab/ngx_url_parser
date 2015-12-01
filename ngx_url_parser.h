@@ -34,16 +34,13 @@ typedef enum {
     sw_schema = 0,
     sw_schema_slash,
     sw_schema_slash_slash,
-    sw_userpass,
     sw_host_start,
     sw_host,
     sw_host_end,
     sw_host_ip_literal,
     sw_port,
-    sw_host_http_09,
     sw_after_slash_in_uri,
     sw_check_uri,
-    sw_check_uri_http_09,
     sw_uri,
     sw_almost_done
 } sw_state;
@@ -82,5 +79,5 @@ typedef struct {
 
 extern int ngx_url_parser(ngx_http_url *r, const char *b);
 
-extern int ngx_url_free(ngx_http_url * url);
+extern void ngx_url_free(ngx_http_url * url);
 #endif

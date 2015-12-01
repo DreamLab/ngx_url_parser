@@ -81,7 +81,7 @@ void init_default_url(ngx_http_url* url) {
     url->userpass = NULL;
 };
 
-inline void copy_from_meta(char **dest, const char * start, const char * end) {
+void copy_from_meta(char **dest, const char * start, const char * end) {
     int size = end - start + 1;
     *dest = (char*)malloc(size);
     memcpy((void*)*dest, start, size - 1);
@@ -155,7 +155,7 @@ int ngx_url_parser(ngx_http_url * url, const char *b) {
     return NGX_URL_INVALID;
 }
 
-int ngx_url_free(ngx_http_url * url) {
+void ngx_url_free(ngx_http_url * url) {
 
     if (url->schema != NULL) {
         free((void*)url->schema);

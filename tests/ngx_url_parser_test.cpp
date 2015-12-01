@@ -327,7 +327,7 @@ TEST(ngx_url_parser, UrlWithUserPassNoUser) {
     ngx_url_free(&url);
 }
 
-TEST(ngx_url_parser, UrlWithAllPramtert) {
+TEST(ngx_url_parser, UrlWithAllParameters) {
 
     const char * str = "https://a:pw@mkaciuba.pl:1/?cbf#abc";
     ngx_http_url url;
