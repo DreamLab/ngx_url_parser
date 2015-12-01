@@ -7,11 +7,14 @@ Yet another url parser, written in C.
 This repository contains url parser extracted from source code of NGINX. There are some changes in code it but concept is same as in NGINX.
 
 Usage:
-```
+----
+Include ngx_url_parser.h and then
+```C
 const char * str = "https://user:password@mkaciuba.pl:555/path/?query#fragment";
 // structure in with result will be stored
 ngx_http_url url;
 
+// run parser
 int status = ngx_url_parser(&url, str);
 if (status != NGX_URL_OK) {
     printf("Error processing url!\n");
