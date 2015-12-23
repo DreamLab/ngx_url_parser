@@ -162,27 +162,39 @@ void ngx_url_free(ngx_http_url * url) {
 
     if (url->schema != NULL) {
         free((void*)url->schema);
+        url->schema = NULL;
     }
 
     if (url->host != NULL) {
         free((void*)url->host);
+        url->host = NULL;
     }
 
     if (url->path != NULL) {
         free((void*)url->path);
+        url->path = NULL;
+    }
+
+    if (url->query != NULL) {
+        free((void*)url->query);
+        url->query= NULL;
     }
 
     if (url->fragment != NULL) {
         free((void*)url->fragment);
+        url->fragment = NULL;
     }
 
     if (url->port != NULL) {
         free((void*)url->port);
+        url->port = NULL;
     }
 
     if (url->auth != NULL) {
         free((void*)url->auth);
+        url->auth = NULL;
     }
+
 }
 
 int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b)
@@ -440,6 +452,7 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b)
             if (usual[ch >> 5] & (1 << (ch & 0x1f))) {
                 break;
             }
+
             switch (ch) {
                 case '/':
                     state = sw_after_slash_in_uri;

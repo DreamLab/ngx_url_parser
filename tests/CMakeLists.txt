@@ -8,6 +8,7 @@ include_directories(${GTEST_INCLUDE_DIRS})
 
 set(TEST_FILES 
     ngx_url_parser_simple_test.cpp
+    ngx_url_parser_invalid_test.cpp
     ngx_url_parser_test.cpp
     main.cpp)
 

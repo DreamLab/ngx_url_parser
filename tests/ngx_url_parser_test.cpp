@@ -4,14 +4,6 @@ extern "C" {
     #include "../ngx_url_parser.h"
 }
 
-TEST(ngx_url_parser, SW_SCHEMA) {
-    const char * str = "818181";
-    ngx_http_url url;
-    int status = ngx_url_parser(&url, str);
-    ngx_url_free(&url);
-    ASSERT_EQ(NGX_URL_INVALID, status);
-}
-
 TEST(ngx_url_parser, SW_SCHEMA_QUERY) {
     const char * str = "?818181";
     ngx_http_url url;
@@ -31,59 +23,6 @@ TEST(ngx_url_parser, SW_SCHEMA_PATH) {
     ngx_url_free(&url);
 }
 
-TEST(ngx_url_parser, SW_SCHEMA_INVALID) {
-    const char * str = "81:8181";
-    ngx_http_url url;
-    int status = ngx_url_parser(&url, str);
-    ASSERT_EQ(NGX_URL_INVALID, status);
-
-    ngx_url_free(&url);
-}
-
-TEST(ngx_url_parser, SW_SCHEMA_INVALID2) {
-    const char * str = ":8181";
-    ngx_http_url url;
-    int status = ngx_url_parser(&url, str);
-    ASSERT_EQ(NGX_URL_INVALID, status);
-
-    ngx_url_free(&url);
-}
-
-TEST(ngx_url_parser, SW_SCHEMA_INVALID3){
-    const char * str = ":8181/";
-    ngx_http_url url;
-    int status = ngx_url_parser(&url, str);
-    ASSERT_EQ(NGX_URL_INVALID, status);
-
-    ngx_url_free(&url);
-}
-
-TEST(ngx_url_parser, SW_SCHEMA_SLASH_INVALID){
-    const char * str = "htt:8";
-    ngx_http_url url;
-    int status = ngx_url_parser(&url, str);
-    ASSERT_EQ(NGX_URL_INVALID, status);
-
-    ngx_url_free(&url);
-}
-
-TEST(ngx_url_parser, SW_SCHEMA_SLASH_INVALID2){
-    const char * str = "htt://";
-    ngx_http_url url;
-    int status = ngx_url_parser(&url, str);
-    ASSERT_EQ(NGX_URL_INVALID, status);
-
-    ngx_url_free(&url);
-}
-
-TEST(ngx_url_parser, SW_HOST_IP_INVALID){
-    const char * str = "htt://[FEDC:BA98:7654:3210:FEDC:BA98:7654:3210";
-    ngx_http_url url;
-    int status = ngx_url_parser(&url, str);
-    ASSERT_EQ(NGX_URL_INVALID, status);
-
-    ngx_url_free(&url);
-}
 
 TEST(ngx_url_parser, SW_HOST_IPv6){
     const char * str = "htt://[FEDC:BA98:7654:3210:FEDC:BA98:7654:3210]";
@@ -112,14 +51,6 @@ TEST(ngx_url_parser, SW_HOST_IPv6_PATH){
     ngx_url_free(&url);
 }
 
-TEST(ngx_url_parser, SW_HOST_INVALID_IP) {
-    const char * str = "http://[::192.#9.5.5]/";
-    ngx_http_url url;
-    int status = ngx_url_parser(&url, str);
-    ASSERT_EQ(NGX_URL_INVALID, status);
-
-    ngx_url_free(&url);
-}
 
 TEST(ngx_url_parser, SW_PORT_IPv6){
     const char * str = "http://[::192.9.5.5]:80";
@@ -232,6 +163,22 @@ TEST(ngx_url_parser, SW_AFTER_SLASH_IN_URI_SLASH_FRAGMENT){
     ngx_url_free(&url);
 }
 
+TEST(ngx_url_parser, SW_AFTER_SLASH_IN_URI_STRANGE_CHAR) {
+    const char * str = "http://[::192.9.5.5]:80/{query";
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+    ASSERT_EQ(NGX_URL_OK, status);
+    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.host, "[::192.9.5.5]");
+    ASSERT_STREQ(url.port, "80");
+    ASSERT_STREQ(url.auth, NULL);
+    ASSERT_STREQ(url.path, "/{query");
+    ASSERT_STREQ(url.query, NULL);
+    ASSERT_STREQ(url.fragment, NULL);
+
+    ngx_url_free(&url);
+}
+
 TEST(ngx_url_parser, SW_CHECK_URI_MORE_HASH){
     const char * str = "http://[::192.9.5.5]:80/###fragment";
     ngx_http_url url;
@@ -259,6 +206,71 @@ TEST(ngx_url_parser, SW_CHECK_URI_EMPTY_HASH){
     ASSERT_STREQ(url.auth, NULL);
     ASSERT_STREQ(url.fragment, "");
     ASSERT_STREQ(url.path, "/");
+    ASSERT_STREQ(url.query, NULL);
+
+    ngx_url_free(&url);
+}
+
+TEST(ngx_url_parser, SW_CHECK_URI_USER){
+    const char * str = "http://example.com/~mkaciuba/";
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+    ASSERT_EQ(NGX_URL_OK, status);
+    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.host, "example.com");
+    ASSERT_STREQ(url.port, NULL);
+    ASSERT_STREQ(url.auth, NULL);
+    ASSERT_STREQ(url.path, "/~mkaciuba/");
+    ASSERT_STREQ(url.fragment, NULL);
+    ASSERT_STREQ(url.query, NULL);
+
+    ngx_url_free(&url);
+}
+
+TEST(ngx_url_parser, SW_AFTER_SLASH_IN_URI_STRANGE_CHAR2){
+    const char * str = "http://www.example.com/te%CC%81st.html";
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+    ASSERT_EQ(NGX_URL_OK, status);
+    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.host, "www.example.com");
+    ASSERT_STREQ(url.port, NULL);
+    ASSERT_STREQ(url.auth, NULL);
+    ASSERT_STREQ(url.path, "/te%CC%81st.html");
+    ASSERT_STREQ(url.fragment, NULL);
+    ASSERT_STREQ(url.query, NULL);
+
+    ngx_url_free(&url);
+}
+
+TEST(ngx_url_parser, SW_AFTER_SLASH_IN_URI_STRANGE_CHAR3){
+    const char * str = "http://www.example.com/|||";
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+    ASSERT_EQ(NGX_URL_OK, status);
+    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.host, "www.example.com");
+    ASSERT_STREQ(url.port, NULL);
+    ASSERT_STREQ(url.auth, NULL);
+    ASSERT_STREQ(url.path, "/|||");
+    ASSERT_STREQ(url.fragment, NULL);
+    ASSERT_STREQ(url.query, NULL);
+
+    ngx_url_free(&url);
+}
+
+
+TEST(ngx_url_parser, SW_AFTER_SLASH_IN_URI_STRANGE_CHAR4){
+    const char * str = "http://www.example.com/ś_,";
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+    ASSERT_EQ(NGX_URL_OK, status);
+    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.host, "www.example.com");
+    ASSERT_STREQ(url.port, NULL);
+    ASSERT_STREQ(url.auth, NULL);
+    ASSERT_STREQ(url.path, "/ś_,");
+    ASSERT_STREQ(url.fragment, NULL);
     ASSERT_STREQ(url.query, NULL);
 
     ngx_url_free(&url);

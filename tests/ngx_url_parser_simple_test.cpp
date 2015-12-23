@@ -4,54 +4,6 @@ extern "C" {
     #include "../ngx_url_parser.h"
 }
 
-TEST(ngx_url_parser, IncorrectUrl) {
-    const char * str = "https:;";
-    ngx_http_url url;
-    int status = ngx_url_parser(&url, str);
-    ngx_url_free(&url);
-    ASSERT_EQ(NGX_URL_INVALID, status);
-}
-
-TEST(ngx_url_parser, IncorrectUrlNoHost) {
-    const char * str = "https:///a";
-    ngx_http_url url;
-    int status = ngx_url_parser(&url, str);
-    ngx_url_free(&url);
-    ASSERT_EQ(NGX_URL_INVALID, status);
-}
-
-TEST(ngx_url_parser, IncorrectUrl2) {
-    const char * str = "";
-    ngx_http_url url;
-    int status = ngx_url_parser(&url, str);
-    ngx_url_free(&url);
-    ASSERT_EQ(NGX_URL_INVALID, status);
-}
-
-TEST(ngx_url_parser, IncorrectUrl3NoPassNoUser) {
-    const char * str = "http://:ssafs/";
-    ngx_http_url url;
-    int status = ngx_url_parser(&url, str);
-    ASSERT_EQ(NGX_URL_INVALID, status);
-    ngx_url_free(&url);
-}
-
-TEST(ngx_url_parser, IncorrectUrl3NoPort) {
-    const char * str = "http://ssafs:/";
-    ngx_http_url url;
-    int status = ngx_url_parser(&url, str);
-    ASSERT_EQ(NGX_URL_INVALID, status);
-    ngx_url_free(&url);
-}
-
-TEST(ngx_url_parser, IncorrectUrl4NoPort) {
-    const char * str = "http://ssafs:";
-    ngx_http_url url;
-    int status = ngx_url_parser(&url, str);
-    ASSERT_EQ(NGX_URL_INVALID, status);
-    ngx_url_free(&url);
-}
-
 TEST(ngx_url_parser, CorrectUrl) {
     const char * str = "http://mkaciuba.pl";
     ngx_http_url url;
@@ -414,3 +366,38 @@ TEST(ngx_url_parser, LongUrl) {
 
     ngx_url_free(&url);
 }
+
+TEST(ngx_url_parser, UrlFromExample) {
+
+    const char * str = "https://user:password@mkaciuba.pl:555/path/?query#fragment";
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+
+    ASSERT_EQ(NGX_URL_OK, status);
+    ASSERT_STREQ(url.host, "mkaciuba.pl");
+    ASSERT_STREQ(url.schema, "https");
+    ASSERT_STREQ(url.path, "/path/");
+    ASSERT_STREQ(url.fragment, "fragment");
+    ASSERT_STREQ(url.query, "query");
+    ASSERT_STREQ(url.auth, "user:password");
+
+    ngx_url_free(&url);
+}
+
+TEST(ngx_url_parser, FreeMemoryTwoTimes) {
+
+    const char * str = "https://user:password@mkaciuba.pl:555/path/?query#fragment";
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+
+    ngx_url_free(&url);
+    ngx_url_free(&url);
+    ASSERT_EQ(NGX_URL_OK, status);
+    ASSERT_STREQ(url.schema, NULL);
+    ASSERT_STREQ(url.path, NULL);
+    ASSERT_STREQ(url.fragment, NULL);
+    ASSERT_STREQ(url.query, NULL);
+    ASSERT_STREQ(url.auth, NULL);
+    ASSERT_STREQ(url.host, NULL);
+}
+
