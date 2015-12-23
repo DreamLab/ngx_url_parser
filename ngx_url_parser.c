@@ -81,7 +81,7 @@ void init_default_url(ngx_http_url* url) {
     url->userpass = NULL;
 };
 
-inline void copy_from_meta(char **dest, const char * start, const char * end) {
+void copy_from_meta(char **dest, const char * start, const char * end) {
     int size = end - start + 1;
     *dest = (char*)malloc(size);
     memcpy((void*)*dest, start, size - 1);
@@ -97,6 +97,9 @@ int ngx_url_parser(ngx_http_url * url, const char *b) {
     int status = ngx_url_parser_meta(&meta, b);
 
     if (status != NGX_URL_OK) {
+    #ifdef NGX_DEBUG
+        printf("Wrong status from meta!");
+    #endif
         return status;
     }
 
@@ -118,8 +121,9 @@ int ngx_url_parser(ngx_http_url * url, const char *b) {
         } else if (meta.fragment_start) {
             copy_from_meta(&url->path, meta.uri_start, meta.fragment_start - 1);
         } else {
-            copy_from_meta(&url->path, meta.uri_start, meta.url_end);
+            copy_from_meta(&url->path, meta.uri_start, meta.uri_end);
         }
+        status += 5;
 
     }
 
@@ -148,14 +152,14 @@ int ngx_url_parser(ngx_http_url * url, const char *b) {
         copy_from_meta(&url->userpass, meta.userpass_start, meta.userpass_end);
     }
 
-    if (status == 2) {
+    if (status == 2 || status == 7 || status == 5) {
         return NGX_URL_OK;
     }
 
     return NGX_URL_INVALID;
 }
 
-int ngx_url_free(ngx_http_url * url) {
+void ngx_url_free(ngx_http_url * url) {
 
     if (url->schema != NULL) {
         free((void*)url->schema);
@@ -193,8 +197,10 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b)
 
     sw_state state = sw_schema;
 
+    int len = strlen(b);
+    int counter = 0;
 
-    for (p = b; p != '\0'; p++) {
+    for (p = b; p != '\0'; p++, counter++) {
         ch = *p;
 
         switch (state) {
@@ -210,6 +216,16 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b)
             case ':':
                 r->schema_end = p;
                 state = sw_schema_slash;
+                break;
+            case '/':
+                state = sw_after_slash_in_uri;
+                r->uri_start = p;
+                break;
+            case '?':
+                if (counter <= len) {
+                    r->args_start = p + 1;
+                }
+                state = sw_uri;
                 break;
             default:
                 #ifdef NGX_DEBUG
@@ -275,7 +291,6 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b)
         case sw_host_end:
 
             r->host_end = p;
-
             switch (ch) {
             case ':':
                 state = sw_port;
@@ -285,11 +300,15 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b)
                 state = sw_after_slash_in_uri;
                 break;
             case '?':
-                r->args_start = p + 1;
+                if (counter <= len) {
+                    r->args_start = p + 1;
+                }
                 state = sw_uri;
                 break;
             case '#':
-                r->fragment_start = p + 1;
+                if (counter <= len) {
+                    r->fragment_start = p + 1;
+                }
                 state = sw_uri;
                 break;
             case '\0':
@@ -388,15 +407,19 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b)
                 state = sw_uri;
                 break;
             case '/':
-                state = sw_uri;
+                state = sw_check_uri;
                 break;
             case '?':
                 r->uri_end = p - 1;
-                r->args_start = p + 1;
+                if (counter <= len) {
+                    r->args_start = p + 1;
+                }
                 state = sw_uri;
                 break;
             case '#':
-                r->fragment_start = p + 1;
+                if (counter <= len) {
+                    r->fragment_start = p + 1;
+                }
                 state = sw_uri;
                 break;
             case '+':
@@ -415,24 +438,29 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b)
             if (usual[ch >> 5] & (1 << (ch & 0x1f))) {
                 break;
             }
-
             switch (ch) {
-            case '/':
-                state = sw_after_slash_in_uri;
-                break;
-            case '%':
-                state = sw_uri;
-                break;
-            case '?':
-                r->args_start = p + 1;
-                state = sw_uri;
-                break;
-            case '#':
-                r->fragment_start = p + 1;
-                state = sw_uri;
-                break;
-            /* case '\0': */
-            /*     return NGX_URL_INVALID; */
+                case '/':
+                    state = sw_after_slash_in_uri;
+                    break;
+                case '%':
+                    state = sw_uri;
+                    break;
+                case '?':
+                    if (counter <= len) {
+                        r->args_start = p + 1;
+                    }
+                    state = sw_uri;
+                    break;
+                case '#':
+                    if (counter <= len) {
+                        r->fragment_start = p + 1;
+                    }
+                    state = sw_uri;
+                    break;
+                case '\0':
+                    r->uri_end = p;
+                    goto done;
+                    break;
             }
             break;
 
@@ -445,13 +473,15 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b)
                 break;
             }
             switch (ch) {
-            case '\0':
-                r->uri_end = p;
-                goto done;
-            case '#':
-                r->fragment_start = p + 1;
-                break;
-            }
+                case '\0':
+                    r->uri_end = p;
+                    goto done;
+                case '#':
+                    if (counter <= len) {
+                        r->fragment_start = p + 1;
+                    }
+                    break;
+                }
             break;
 
 
@@ -475,8 +505,6 @@ done:
     if (r->url_end == NULL) {
         r->url_end = p;
     }
-
-    r->state = sw_schema;
 
     return NGX_URL_OK;
 }

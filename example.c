@@ -4,10 +4,17 @@
 
 int main(int argc, char *argv[])
 {
-
-    const char * str = "https://a:b@mkaciuba.pl:555/b/?a=1#a";
+    const char * str = "https://user:password@mkaciuba.pl:555/path/?query#fragment";
+    // structure in with result will be stored
     ngx_http_url url;
+
     int status = ngx_url_parser(&url, str);
+    if (status != NGX_URL_OK) {
+        printf("Error processing url!\n");
+        return 1;
+    }
+
+    printf("Url = %s\n", str);
     printf("\nParse status %d", status);
     printf("\n Schema = %s", url.schema);
     printf("\n Host = %s", url.host);
@@ -17,14 +24,9 @@ int main(int argc, char *argv[])
     printf("\n Fragment = %s", url.fragment);
     printf("\n UserPass = %s", url.userpass);
     printf("\n");
-    /* const char * i = url.url_start; */
-    /* if (url.url_start) */
-    /*     printf("url start %c\n", *(url.url_start)); */
-    /* if (url.args_start != NULL) */
-    /*     printf("%c", *url.args_start); */
 
-    /* for (; i != url.schema_end; i++) */
-    /*     printf("%c", *i); */
+    // free memory
     ngx_url_free(&url);
+
     return 0;
 }
