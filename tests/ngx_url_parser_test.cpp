@@ -191,7 +191,7 @@ TEST(ngx_url_parser, SW_AFTER_SLASH_IN_URI_SLASH){
     ngx_url_free(&url);
 }
 
-TEST(ngx_url_parser, SW_AFTER_SLASH_IN_URI_SLASH_FRAMGENT){
+TEST(ngx_url_parser, SW_AFTER_SLASH_IN_URI_SLASH_FRAGMENT){
     const char * str = "http://[::192.9.5.5]:80///#fragment";
     ngx_http_url url;
     int status = ngx_url_parser(&url, str);
