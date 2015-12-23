@@ -23,7 +23,6 @@ TEST(ngx_url_parser, SW_SCHEMA_PATH) {
     ngx_url_free(&url);
 }
 
-
 TEST(ngx_url_parser, SW_HOST_IPv6){
     const char * str = "htt://[FEDC:BA98:7654:3210:FEDC:BA98:7654:3210]";
     ngx_http_url url;

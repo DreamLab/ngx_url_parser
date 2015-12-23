@@ -147,3 +147,12 @@ TEST(ngx_url_parser, UrlInvalidTwoAt) {
     ngx_url_free(&url);
 }
 
+TEST(ngx_url_parser, InvalidPathTylda){
+    const char * str = "http://example.com~mkaciuba/";
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+    ASSERT_EQ(NGX_URL_INVALID, status);
+
+    ngx_url_free(&url);
+}
+

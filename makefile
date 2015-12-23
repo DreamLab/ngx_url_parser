@@ -5,7 +5,7 @@ all: example static-lib
 
 obj/ngx_url_parser.o: ngx_url_parser.c
 	mkdir -p obj
-	$(CC) -fPIC -I. -o $@ -c $^ 
+	$(CC) -fPIC -I. -o $@ -c $^ -O2
 
 static-lib: obj/ngx_url_parser.o
 	mkdir -p lib 
