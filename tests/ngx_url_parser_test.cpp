@@ -12,6 +12,15 @@ TEST(ngx_url_parser, SW_SCHEMA) {
     ASSERT_EQ(NGX_URL_INVALID, status);
 }
 
+TEST(ngx_url_parser, SW_SCHEMA_QUERY) {
+    const char * str = "?818181";
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+    ASSERT_STREQ(url.query, "818181");
+    ASSERT_EQ(NGX_URL_OK, status);
+    ngx_url_free(&url);
+}
+
 TEST(ngx_url_parser, SW_SCHEMA_PATH) {
     const char * str = "/818181";
     ngx_http_url url;
@@ -135,7 +144,7 @@ TEST(ngx_url_parser, USER_PASS){
     ASSERT_STREQ(url.schema, "http");
     ASSERT_STREQ(url.host, "[::192.9.5.5]");
     ASSERT_STREQ(url.port, "80");
-    ASSERT_STREQ(url.userpass, "user:pass");
+    ASSERT_STREQ(url.auth, "user:pass");
     ASSERT_STREQ(url.path, NULL);
     ASSERT_STREQ(url.query, NULL);
     ASSERT_STREQ(url.fragment, NULL);
@@ -151,7 +160,7 @@ TEST(ngx_url_parser, SW_AFTER_SLASH_IN_URI_DOT){
     ASSERT_STREQ(url.schema, "http");
     ASSERT_STREQ(url.host, "[::192.9.5.5]");
     ASSERT_STREQ(url.port, "80");
-    ASSERT_STREQ(url.userpass, NULL);
+    ASSERT_STREQ(url.auth, NULL);
     ASSERT_STREQ(url.path, "/.");
     ASSERT_STREQ(url.query, NULL);
     ASSERT_STREQ(url.fragment, NULL);
@@ -167,8 +176,24 @@ TEST(ngx_url_parser, SW_AFTER_SLASH_IN_URI_PERCENT){
     ASSERT_STREQ(url.schema, "http");
     ASSERT_STREQ(url.host, "[::192.9.5.5]");
     ASSERT_STREQ(url.port, "80");
-    ASSERT_STREQ(url.userpass, NULL);
+    ASSERT_STREQ(url.auth, NULL);
     ASSERT_STREQ(url.path, "/%");
+    ASSERT_STREQ(url.query, NULL);
+    ASSERT_STREQ(url.fragment, NULL);
+
+    ngx_url_free(&url);
+}
+
+TEST(ngx_url_parser, SW_AFTER_SLASH_IN_URI_MORE_PERCENT){
+    const char * str = "http://[::192.9.5.5]:80/%%%%";
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+    ASSERT_EQ(NGX_URL_OK, status);
+    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.host, "[::192.9.5.5]");
+    ASSERT_STREQ(url.port, "80");
+    ASSERT_STREQ(url.auth, NULL);
+    ASSERT_STREQ(url.path, "/%%%%");
     ASSERT_STREQ(url.query, NULL);
     ASSERT_STREQ(url.fragment, NULL);
 
@@ -183,7 +208,7 @@ TEST(ngx_url_parser, SW_AFTER_SLASH_IN_URI_SLASH){
     ASSERT_STREQ(url.schema, "http");
     ASSERT_STREQ(url.host, "[::192.9.5.5]");
     ASSERT_STREQ(url.port, "80");
-    ASSERT_STREQ(url.userpass, NULL);
+    ASSERT_STREQ(url.auth, NULL);
     ASSERT_STREQ(url.path, "///");
     ASSERT_STREQ(url.query, NULL);
     ASSERT_STREQ(url.fragment, NULL);
@@ -199,10 +224,42 @@ TEST(ngx_url_parser, SW_AFTER_SLASH_IN_URI_SLASH_FRAGMENT){
     ASSERT_STREQ(url.schema, "http");
     ASSERT_STREQ(url.host, "[::192.9.5.5]");
     ASSERT_STREQ(url.port, "80");
-    ASSERT_STREQ(url.userpass, NULL);
+    ASSERT_STREQ(url.auth, NULL);
     ASSERT_STREQ(url.path, "///");
     ASSERT_STREQ(url.query, NULL);
     ASSERT_STREQ(url.fragment, "fragment");
+
+    ngx_url_free(&url);
+}
+
+TEST(ngx_url_parser, SW_CHECK_URI_MORE_HASH){
+    const char * str = "http://[::192.9.5.5]:80/###fragment";
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+    ASSERT_EQ(NGX_URL_OK, status);
+    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.host, "[::192.9.5.5]");
+    ASSERT_STREQ(url.port, "80");
+    ASSERT_STREQ(url.auth, NULL);
+    ASSERT_STREQ(url.fragment, "##fragment");
+    ASSERT_STREQ(url.path, "/");
+    ASSERT_STREQ(url.query, NULL);
+
+    ngx_url_free(&url);
+}
+
+TEST(ngx_url_parser, SW_CHECK_URI_EMPTY_HASH){
+    const char * str = "http://[::192.9.5.5]:80/#";
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+    ASSERT_EQ(NGX_URL_OK, status);
+    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.host, "[::192.9.5.5]");
+    ASSERT_STREQ(url.port, "80");
+    ASSERT_STREQ(url.auth, NULL);
+    ASSERT_STREQ(url.fragment, "");
+    ASSERT_STREQ(url.path, "/");
+    ASSERT_STREQ(url.query, NULL);
 
     ngx_url_free(&url);
 }

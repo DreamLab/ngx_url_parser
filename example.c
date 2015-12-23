@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
     printf("\n Path = %s", url.path);
     printf("\n Query = %s", url.query);
     printf("\n Fragment = %s", url.fragment);
-    printf("\n UserPass = %s", url.userpass);
+    printf("\n auth = %s", url.auth);
     printf("\n");
 
     // free memory

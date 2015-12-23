@@ -30,7 +30,7 @@ printf("\n Port = %s", url.port);
 printf("\n Path = %s", url.path);
 printf("\n Query = %s", url.query);
 printf("\n Fragment = %s", url.fragment);
-printf("\n UserPass = %s", url.userpass);
+printf("\n Auth = %s", url.auth);
 printf("\n");
 
 // free memory

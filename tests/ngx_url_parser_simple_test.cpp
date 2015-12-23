@@ -72,7 +72,7 @@ TEST(ngx_url_parser, UrlWithPort) {
     ASSERT_STREQ(url.path, NULL);
     ASSERT_STREQ(url.query, NULL);
     ASSERT_STREQ(url.fragment, NULL);
-    ASSERT_STREQ(url.userpass, NULL);
+    ASSERT_STREQ(url.auth, NULL);
 
     ngx_url_free(&url);
 }
@@ -88,7 +88,7 @@ TEST(ngx_url_parser, UrlWithPort2) {
     ASSERT_STREQ(url.path, NULL);
     ASSERT_STREQ(url.query, NULL);
     ASSERT_STREQ(url.fragment, NULL);
-    ASSERT_STREQ(url.userpass, NULL);
+    ASSERT_STREQ(url.auth, NULL);
 
     ngx_url_free(&url);
 }
@@ -105,7 +105,7 @@ TEST(ngx_url_parser, UrlWithPortAndPath) {
     ASSERT_STREQ(url.path, "/");
     ASSERT_STREQ(url.query, NULL);
     ASSERT_STREQ(url.fragment, NULL);
-    ASSERT_STREQ(url.userpass, NULL);
+    ASSERT_STREQ(url.auth, NULL);
 
     ngx_url_free(&url);
 }
@@ -122,7 +122,7 @@ TEST(ngx_url_parser, UrlWithPath) {
     ASSERT_STREQ(url.path, "/");
     ASSERT_STREQ(url.query, NULL);
     ASSERT_STREQ(url.fragment, NULL);
-    ASSERT_STREQ(url.userpass, NULL);
+    ASSERT_STREQ(url.auth, NULL);
 
     ngx_url_free(&url);
 }
@@ -139,7 +139,7 @@ TEST(ngx_url_parser, UrlWithPath2) {
     ASSERT_STREQ(url.path, "/X");
     ASSERT_STREQ(url.query, NULL);
     ASSERT_STREQ(url.fragment, NULL);
-    ASSERT_STREQ(url.userpass, NULL);
+    ASSERT_STREQ(url.auth, NULL);
 
     ngx_url_free(&url);
 }
@@ -156,7 +156,7 @@ TEST(ngx_url_parser, UrlWithPathAndQuery) {
     ASSERT_STREQ(url.path, "/");
     ASSERT_STREQ(url.query, "a=2&b[]=1");
     ASSERT_STREQ(url.fragment, NULL);
-    ASSERT_STREQ(url.userpass, NULL);
+    ASSERT_STREQ(url.auth, NULL);
 
     ngx_url_free(&url);
 }
@@ -173,7 +173,7 @@ TEST(ngx_url_parser, UrlWithPathAndQuery2) {
     ASSERT_STREQ(url.path, "/d/b/");
     ASSERT_STREQ(url.query, "a=2&b[]=1");
     ASSERT_STREQ(url.fragment, NULL);
-    ASSERT_STREQ(url.userpass, NULL);
+    ASSERT_STREQ(url.auth, NULL);
 
     ngx_url_free(&url);
 }
@@ -190,7 +190,7 @@ TEST(ngx_url_parser, UrlWithPathAndQuery3) {
     ASSERT_STREQ(url.path, "/d/b");
     ASSERT_STREQ(url.query, "a=2&b[]=1");
     ASSERT_STREQ(url.fragment, NULL);
-    ASSERT_STREQ(url.userpass, NULL);
+    ASSERT_STREQ(url.auth, NULL);
 
     ngx_url_free(&url);
 }
@@ -207,7 +207,7 @@ TEST(ngx_url_parser, UrlWithPathAndFragment) {
     ASSERT_STREQ(url.port, NULL);
     ASSERT_STREQ(url.path, "/");
     ASSERT_STREQ(url.query, NULL);
-    ASSERT_STREQ(url.userpass, NULL);
+    ASSERT_STREQ(url.auth, NULL);
 
     ngx_url_free(&url);
 }
@@ -224,7 +224,7 @@ TEST(ngx_url_parser, UrlWithQuery) {
     ASSERT_STREQ(url.port, NULL);
     ASSERT_STREQ(url.path, NULL);
     ASSERT_STREQ(url.query, "aa");
-    ASSERT_STREQ(url.userpass, NULL);
+    ASSERT_STREQ(url.auth, NULL);
 
     ngx_url_free(&url);
 }
@@ -241,7 +241,7 @@ TEST(ngx_url_parser, UrlWithQuery2) {
     ASSERT_STREQ(url.port, NULL);
     ASSERT_STREQ(url.path, NULL);
     ASSERT_STREQ(url.query, "");
-    ASSERT_STREQ(url.userpass, NULL);
+    ASSERT_STREQ(url.auth, NULL);
 
     ngx_url_free(&url);
 }
@@ -258,7 +258,7 @@ TEST(ngx_url_parser, UrlWithFragment) {
     ASSERT_STREQ(url.port, NULL);
     ASSERT_STREQ(url.path, NULL);
     ASSERT_STREQ(url.fragment, "aa");
-    ASSERT_STREQ(url.userpass, NULL);
+    ASSERT_STREQ(url.auth, NULL);
 
     ngx_url_free(&url);
 }
@@ -275,12 +275,12 @@ TEST(ngx_url_parser, UrlWithRandomQuery) {
     ASSERT_STREQ(url.path, "/");
     ASSERT_STREQ(url.fragment, NULL);
     ASSERT_STREQ(url.query, "sdfsdf?sdfsdfsd");
-    ASSERT_STREQ(url.userpass, NULL);
+    ASSERT_STREQ(url.auth, NULL);
 
     ngx_url_free(&url);
 }
 
-TEST(ngx_url_parser, UrlWithUserPass) {
+TEST(ngx_url_parser, UrlWithauth) {
 
     const char * str = "https://marcin:a@mkaciuba.pl/?sdfsdf?sdfsdfsd";
     ngx_http_url url;
@@ -293,12 +293,12 @@ TEST(ngx_url_parser, UrlWithUserPass) {
     ASSERT_STREQ(url.path, "/");
     ASSERT_STREQ(url.fragment, NULL);
     ASSERT_STREQ(url.query, "sdfsdf?sdfsdfsd");
-    ASSERT_STREQ(url.userpass, "marcin:a");
+    ASSERT_STREQ(url.auth, "marcin:a");
 
     ngx_url_free(&url);
 }
 
-TEST(ngx_url_parser, UrlWithUserPassNoPass) {
+TEST(ngx_url_parser, UrlWithauthNoPass) {
 
     const char * str = "https://marcin:@mkaciuba.pl/?sdfsdf?sdfsdfsd";
     ngx_http_url url;
@@ -311,12 +311,12 @@ TEST(ngx_url_parser, UrlWithUserPassNoPass) {
     ASSERT_STREQ(url.path, "/");
     ASSERT_STREQ(url.fragment, NULL);
     ASSERT_STREQ(url.query, "sdfsdf?sdfsdfsd");
-    ASSERT_STREQ(url.userpass, "marcin:");
+    ASSERT_STREQ(url.auth, "marcin:");
 
     ngx_url_free(&url);
 }
 
-TEST(ngx_url_parser, UrlWithUserPassNoUser) {
+TEST(ngx_url_parser, UrlWithauthNoUser) {
 
     const char * str = "https://:pw@mkaciuba.pl/?sdfsdf?sdfsdfsd";
     ngx_http_url url;
@@ -329,7 +329,7 @@ TEST(ngx_url_parser, UrlWithUserPassNoUser) {
     ASSERT_STREQ(url.path, "/");
     ASSERT_STREQ(url.fragment, NULL);
     ASSERT_STREQ(url.query, "sdfsdf?sdfsdfsd");
-    ASSERT_STREQ(url.userpass, ":pw");
+    ASSERT_STREQ(url.auth, ":pw");
 
     ngx_url_free(&url);
 }
@@ -347,7 +347,7 @@ TEST(ngx_url_parser, UrlWithAllParameters) {
     ASSERT_STREQ(url.path, "/");
     ASSERT_STREQ(url.fragment, "abc");
     ASSERT_STREQ(url.query, "cbf");
-    ASSERT_STREQ(url.userpass, "a:pw");
+    ASSERT_STREQ(url.auth, "a:pw");
 
     ngx_url_free(&url);
 }
