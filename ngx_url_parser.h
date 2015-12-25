@@ -42,7 +42,7 @@ typedef enum {
     sw_after_slash_in_uri,
     sw_check_uri,
     sw_uri,
-    sw_almost_done
+    sw_fragment
 } sw_state;
 
 typedef struct {
@@ -51,8 +51,8 @@ typedef struct {
     const char * schema_end;
     const char * host_start;
     const char * host_end;
-    const char * userpass_start;
-    const char * userpass_end;
+    const char * auth_start;
+    const char * auth_end;
     const char * uri_start;
     const char * uri_end;
     const char * args_start;
@@ -68,7 +68,7 @@ typedef struct {
     char * query;
     char * fragment;
     char * port;
-    char * userpass;
+    char * auth;
 
 } ngx_http_url;
 

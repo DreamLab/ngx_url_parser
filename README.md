@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/Aldor007/ngx_url_parser.svg)](https://travis-ci.org/Aldor007/ngx_url_parser)
+[![Coverage Status](https://coveralls.io/repos/Aldor007/ngx_url_parser/badge.svg?branch=master&service=github)](https://coveralls.io/github/Aldor007/ngx_url_parser?branch=master)
 
 ngx_url_parser
 ==============
@@ -29,7 +30,7 @@ printf("\n Port = %s", url.port);
 printf("\n Path = %s", url.path);
 printf("\n Query = %s", url.query);
 printf("\n Fragment = %s", url.fragment);
-printf("\n UserPass = %s", url.userpass);
+printf("\n Auth = %s", url.auth);
 printf("\n");
 
 // free memory

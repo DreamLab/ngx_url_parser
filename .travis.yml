@@ -2,10 +2,16 @@ language:
     - cpp
 before_install:
     - sudo apt-get update
+    - sudo apt-get install lcov
+    - sudo pip install cpp-coveralls
+    - sudo pip install gcovr
     - sudo apt-get install libgtest-dev
     - "cd /usr/src/gtest && sudo cmake . && sudo cmake --build . && sudo mv libg* /usr/local/lib/ ; cd -"
 script:
     - rm -f makefile
-    - cmake CMakeLists.txt
+    - cmake CMakeLists.txt -DNGX_URL_TESTS_COVERAGE=ON -DBUILD_TESTS=ON
     - make
+    - make coverage
     - ./tests/unit_tests
+after_success:
+    - coveralls -i ngx_url_parser.c  --exclude tests -b tests/CMakeFiles/unit_tests.dir --gcov-options '\-lp'

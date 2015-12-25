@@ -4,381 +4,271 @@ extern "C" {
     #include "../ngx_url_parser.h"
 }
 
-
-TEST(ngx_url_parser, IncorrectUrl) {
-    const char * str = "https:;";
+TEST(ngx_url_parser, SW_SCHEMA_QUERY) {
+    const char * str = "?818181";
     ngx_http_url url;
     int status = ngx_url_parser(&url, str);
-    ngx_url_free(&url);
-    ASSERT_EQ(NGX_URL_INVALID, status);
-}
-
-TEST(ngx_url_parser, IncorrectUrlNoHost) {
-    const char * str = "https:///a";
-    ngx_http_url url;
-    int status = ngx_url_parser(&url, str);
-    ngx_url_free(&url);
-    ASSERT_EQ(NGX_URL_INVALID, status);
-}
-
-TEST(ngx_url_parser, IncorrectUrl2) {
-    const char * str = "";
-    ngx_http_url url;
-    int status = ngx_url_parser(&url, str);
-    ngx_url_free(&url);
-    ASSERT_EQ(NGX_URL_INVALID, status);
-}
-
-TEST(ngx_url_parser, IncorrectUrl3NoPassNoUser) {
-    const char * str = "http://:ssafs/";
-    ngx_http_url url;
-    int status = ngx_url_parser(&url, str);
-    ASSERT_EQ(NGX_URL_INVALID, status);
-    ngx_url_free(&url);
-}
-
-TEST(ngx_url_parser, IncorrectUrl3NoPort) {
-    const char * str = "http://ssafs:/";
-    ngx_http_url url;
-    int status = ngx_url_parser(&url, str);
-    ASSERT_EQ(NGX_URL_INVALID, status);
-    ngx_url_free(&url);
-}
-
-TEST(ngx_url_parser, IncorrectUrl4NoPort) {
-    const char * str = "http://ssafs:";
-    ngx_http_url url;
-    int status = ngx_url_parser(&url, str);
-    ASSERT_EQ(NGX_URL_INVALID, status);
-    ngx_url_free(&url);
-}
-
-TEST(ngx_url_parser, CorrectUrl) {
-    const char * str = "http://mkaciuba.pl";
-    ngx_http_url url;
-    int status = ngx_url_parser(&url, str);
-    ngx_url_free(&url);
+    ASSERT_STREQ(url.query, "818181");
     ASSERT_EQ(NGX_URL_OK, status);
+    ngx_url_free(&url);
 }
 
-TEST(ngx_url_parser, UrlWithPort) {
-    const char * str = "http://mkaciuba.pl:443";
+TEST(ngx_url_parser, SW_SCHEMA_PATH) {
+    const char * str = "/818181";
     ngx_http_url url;
     int status = ngx_url_parser(&url, str);
-
     ASSERT_EQ(NGX_URL_OK, status);
-    ASSERT_STREQ(url.host, "mkaciuba.pl");
+
+    ASSERT_STREQ(url.path, "/818181");
+    ngx_url_free(&url);
+}
+
+TEST(ngx_url_parser, SW_HOST_IPv6){
+    const char * str = "htt://[FEDC:BA98:7654:3210:FEDC:BA98:7654:3210]";
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+    ASSERT_STREQ(url.host, "[FEDC:BA98:7654:3210:FEDC:BA98:7654:3210]");
+    ASSERT_STREQ(url.schema, "htt");
+    ASSERT_STREQ(url.fragment, NULL);
+    ASSERT_STREQ(url.query, NULL);
+    ASSERT_EQ(NGX_URL_OK, status);
+
+    ngx_url_free(&url);
+}
+
+TEST(ngx_url_parser, SW_HOST_IPv6_PATH){
+    const char * str = "http://[::192.9.5.5]/ipng";
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+    ASSERT_EQ(NGX_URL_OK, status);
     ASSERT_STREQ(url.schema, "http");
-    ASSERT_STREQ(url.port, "443");
+    ASSERT_STREQ(url.host, "[::192.9.5.5]");
+    ASSERT_STREQ(url.path, "/ipng");
+    ASSERT_STREQ(url.query, NULL);
+    ASSERT_STREQ(url.fragment, NULL);
+
+    ngx_url_free(&url);
+}
+
+
+TEST(ngx_url_parser, SW_PORT_IPv6){
+    const char * str = "http://[::192.9.5.5]:80";
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+    ASSERT_EQ(NGX_URL_OK, status);
+    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.host, "[::192.9.5.5]");
+    ASSERT_STREQ(url.port, "80");
     ASSERT_STREQ(url.path, NULL);
     ASSERT_STREQ(url.query, NULL);
     ASSERT_STREQ(url.fragment, NULL);
-    ASSERT_STREQ(url.userpass, NULL);
 
     ngx_url_free(&url);
 }
-TEST(ngx_url_parser, UrlWithPort2) {
-    const char * str = "http://mkaciuba.pl:4";
+
+TEST(ngx_url_parser, USER_PASS){
+    const char * str = "http://user:pass@[::192.9.5.5]:80";
     ngx_http_url url;
     int status = ngx_url_parser(&url, str);
-
     ASSERT_EQ(NGX_URL_OK, status);
-    ASSERT_STREQ(url.host, "mkaciuba.pl");
     ASSERT_STREQ(url.schema, "http");
-    ASSERT_STREQ(url.port, "4");
+    ASSERT_STREQ(url.host, "[::192.9.5.5]");
+    ASSERT_STREQ(url.port, "80");
+    ASSERT_STREQ(url.auth, "user:pass");
     ASSERT_STREQ(url.path, NULL);
     ASSERT_STREQ(url.query, NULL);
     ASSERT_STREQ(url.fragment, NULL);
-    ASSERT_STREQ(url.userpass, NULL);
 
     ngx_url_free(&url);
 }
 
-TEST(ngx_url_parser, UrlWithPortAndPath) {
-    const char * str = "http://mkaciuba.pl:443/";
+TEST(ngx_url_parser, SW_AFTER_SLASH_IN_URI_DOT){
+    const char * str = "http://[::192.9.5.5]:80/.";
     ngx_http_url url;
     int status = ngx_url_parser(&url, str);
-
     ASSERT_EQ(NGX_URL_OK, status);
-    ASSERT_STREQ(url.host, "mkaciuba.pl");
     ASSERT_STREQ(url.schema, "http");
-    ASSERT_STREQ(url.port, "443");
-    ASSERT_STREQ(url.path, "/");
+    ASSERT_STREQ(url.host, "[::192.9.5.5]");
+    ASSERT_STREQ(url.port, "80");
+    ASSERT_STREQ(url.auth, NULL);
+    ASSERT_STREQ(url.path, "/.");
     ASSERT_STREQ(url.query, NULL);
     ASSERT_STREQ(url.fragment, NULL);
-    ASSERT_STREQ(url.userpass, NULL);
 
     ngx_url_free(&url);
 }
 
-TEST(ngx_url_parser, UrlWithPath) {
-    const char * str = "http://mkaciuba.pl/";
+TEST(ngx_url_parser, SW_AFTER_SLASH_IN_URI_PERCENT){
+    const char * str = "http://[::192.9.5.5]:80/%";
     ngx_http_url url;
     int status = ngx_url_parser(&url, str);
-
     ASSERT_EQ(NGX_URL_OK, status);
-    ASSERT_STREQ(url.host, "mkaciuba.pl");
     ASSERT_STREQ(url.schema, "http");
-    ASSERT_STREQ(url.port, NULL);
-    ASSERT_STREQ(url.path, "/");
+    ASSERT_STREQ(url.host, "[::192.9.5.5]");
+    ASSERT_STREQ(url.port, "80");
+    ASSERT_STREQ(url.auth, NULL);
+    ASSERT_STREQ(url.path, "/%");
     ASSERT_STREQ(url.query, NULL);
     ASSERT_STREQ(url.fragment, NULL);
-    ASSERT_STREQ(url.userpass, NULL);
 
     ngx_url_free(&url);
 }
 
-TEST(ngx_url_parser, UrlWithPath2) {
-    const char * str = "http://mkaciuba.pl/X";
+TEST(ngx_url_parser, SW_AFTER_SLASH_IN_URI_MORE_PERCENT){
+    const char * str = "http://[::192.9.5.5]:80/%%%%";
     ngx_http_url url;
     int status = ngx_url_parser(&url, str);
-
     ASSERT_EQ(NGX_URL_OK, status);
-    ASSERT_STREQ(url.host, "mkaciuba.pl");
     ASSERT_STREQ(url.schema, "http");
-    ASSERT_STREQ(url.port, NULL);
-    ASSERT_STREQ(url.path, "/X");
+    ASSERT_STREQ(url.host, "[::192.9.5.5]");
+    ASSERT_STREQ(url.port, "80");
+    ASSERT_STREQ(url.auth, NULL);
+    ASSERT_STREQ(url.path, "/%%%%");
     ASSERT_STREQ(url.query, NULL);
     ASSERT_STREQ(url.fragment, NULL);
-    ASSERT_STREQ(url.userpass, NULL);
 
     ngx_url_free(&url);
 }
 
-TEST(ngx_url_parser, UrlWithPathAndQuery) {
-    const char * str = "http://mkaciuba.pl/?a=2&b[]=1";
+TEST(ngx_url_parser, SW_AFTER_SLASH_IN_URI_SLASH){
+    const char * str = "http://[::192.9.5.5]:80///";
     ngx_http_url url;
     int status = ngx_url_parser(&url, str);
-
     ASSERT_EQ(NGX_URL_OK, status);
-    ASSERT_STREQ(url.host, "mkaciuba.pl");
     ASSERT_STREQ(url.schema, "http");
-    ASSERT_STREQ(url.port, NULL);
-    ASSERT_STREQ(url.path, "/");
-    ASSERT_STREQ(url.query, "a=2&b[]=1");
+    ASSERT_STREQ(url.host, "[::192.9.5.5]");
+    ASSERT_STREQ(url.port, "80");
+    ASSERT_STREQ(url.auth, NULL);
+    ASSERT_STREQ(url.path, "///");
+    ASSERT_STREQ(url.query, NULL);
     ASSERT_STREQ(url.fragment, NULL);
-    ASSERT_STREQ(url.userpass, NULL);
 
     ngx_url_free(&url);
 }
 
-TEST(ngx_url_parser, UrlWithPathAndQuery2) {
-    const char * str = "http://mkaciuba.pl/d/b/?a=2&b[]=1";
+TEST(ngx_url_parser, SW_AFTER_SLASH_IN_URI_SLASH_FRAGMENT){
+    const char * str = "http://[::192.9.5.5]:80///#fragment";
     ngx_http_url url;
     int status = ngx_url_parser(&url, str);
-
     ASSERT_EQ(NGX_URL_OK, status);
-    ASSERT_STREQ(url.host, "mkaciuba.pl");
     ASSERT_STREQ(url.schema, "http");
-    ASSERT_STREQ(url.port, NULL);
-    ASSERT_STREQ(url.path, "/d/b/");
-    ASSERT_STREQ(url.query, "a=2&b[]=1");
-    ASSERT_STREQ(url.fragment, NULL);
-    ASSERT_STREQ(url.userpass, NULL);
+    ASSERT_STREQ(url.host, "[::192.9.5.5]");
+    ASSERT_STREQ(url.port, "80");
+    ASSERT_STREQ(url.auth, NULL);
+    ASSERT_STREQ(url.path, "///");
+    ASSERT_STREQ(url.query, NULL);
+    ASSERT_STREQ(url.fragment, "fragment");
 
     ngx_url_free(&url);
 }
 
-TEST(ngx_url_parser, UrlWithPathAndQuery3) {
-    const char * str = "https://mkaciuba.pl/d/b?a=2&b[]=1";
+TEST(ngx_url_parser, SW_AFTER_SLASH_IN_URI_STRANGE_CHAR) {
+    const char * str = "http://[::192.9.5.5]:80/{query";
     ngx_http_url url;
     int status = ngx_url_parser(&url, str);
-
     ASSERT_EQ(NGX_URL_OK, status);
-    ASSERT_STREQ(url.host, "mkaciuba.pl");
-    ASSERT_STREQ(url.schema, "https");
-    ASSERT_STREQ(url.port, NULL);
-    ASSERT_STREQ(url.path, "/d/b");
-    ASSERT_STREQ(url.query, "a=2&b[]=1");
+    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.host, "[::192.9.5.5]");
+    ASSERT_STREQ(url.port, "80");
+    ASSERT_STREQ(url.auth, NULL);
+    ASSERT_STREQ(url.path, "/{query");
+    ASSERT_STREQ(url.query, NULL);
     ASSERT_STREQ(url.fragment, NULL);
-    ASSERT_STREQ(url.userpass, NULL);
 
     ngx_url_free(&url);
 }
 
-TEST(ngx_url_parser, UrlWithPathAndFragment) {
-    const char * str = "https://mkaciuba.pl/#test";
+TEST(ngx_url_parser, SW_CHECK_URI_MORE_HASH){
+    const char * str = "http://[::192.9.5.5]:80/###fragment";
     ngx_http_url url;
     int status = ngx_url_parser(&url, str);
-
     ASSERT_EQ(NGX_URL_OK, status);
-    ASSERT_STREQ(url.host, "mkaciuba.pl");
-    ASSERT_STREQ(url.schema, "https");
-    ASSERT_STREQ(url.fragment, "test");
-    ASSERT_STREQ(url.port, NULL);
+    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.host, "[::192.9.5.5]");
+    ASSERT_STREQ(url.port, "80");
+    ASSERT_STREQ(url.auth, NULL);
+    ASSERT_STREQ(url.fragment, "##fragment");
     ASSERT_STREQ(url.path, "/");
     ASSERT_STREQ(url.query, NULL);
-    ASSERT_STREQ(url.userpass, NULL);
 
     ngx_url_free(&url);
 }
 
-TEST(ngx_url_parser, UrlWithQuery) {
-    const char * str = "https://mkaciuba.pl?aa";
+TEST(ngx_url_parser, SW_CHECK_URI_EMPTY_HASH){
+    const char * str = "http://[::192.9.5.5]:80/#";
     ngx_http_url url;
     int status = ngx_url_parser(&url, str);
-
     ASSERT_EQ(NGX_URL_OK, status);
-    ASSERT_STREQ(url.host, "mkaciuba.pl");
-    ASSERT_STREQ(url.schema, "https");
-    ASSERT_STREQ(url.fragment, NULL);
-    ASSERT_STREQ(url.port, NULL);
-    ASSERT_STREQ(url.path, NULL);
-    ASSERT_STREQ(url.query, "aa");
-    ASSERT_STREQ(url.userpass, NULL);
-
-    ngx_url_free(&url);
-}
-
-TEST(ngx_url_parser, UrlWithQuery2) {
-    const char * str = "https://mkaciuba.pl?";
-    ngx_http_url url;
-    int status = ngx_url_parser(&url, str);
-
-    ASSERT_EQ(NGX_URL_OK, status);
-    ASSERT_STREQ(url.host, "mkaciuba.pl");
-    ASSERT_STREQ(url.schema, "https");
-    ASSERT_STREQ(url.fragment, NULL);
-    ASSERT_STREQ(url.port, NULL);
-    ASSERT_STREQ(url.path, NULL);
-    ASSERT_STREQ(url.query, "");
-    ASSERT_STREQ(url.userpass, NULL);
-
-    ngx_url_free(&url);
-}
-
-TEST(ngx_url_parser, UrlWithFragment) {
-    const char * str = "https://mkaciuba.pl#aa";
-    ngx_http_url url;
-    int status = ngx_url_parser(&url, str);
-
-    ASSERT_EQ(NGX_URL_OK, status);
-    ASSERT_STREQ(url.host, "mkaciuba.pl");
-    ASSERT_STREQ(url.schema, "https");
+    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.host, "[::192.9.5.5]");
+    ASSERT_STREQ(url.port, "80");
+    ASSERT_STREQ(url.auth, NULL);
+    ASSERT_STREQ(url.fragment, "");
+    ASSERT_STREQ(url.path, "/");
     ASSERT_STREQ(url.query, NULL);
-    ASSERT_STREQ(url.port, NULL);
-    ASSERT_STREQ(url.path, NULL);
-    ASSERT_STREQ(url.fragment, "aa");
-    ASSERT_STREQ(url.userpass, NULL);
 
     ngx_url_free(&url);
 }
 
-TEST(ngx_url_parser, UrlWithRandomQuery) {
-    const char * str = "https://mkaciuba.pl/?sdfsdf?sdfsdfsd";
+TEST(ngx_url_parser, SW_CHECK_URI_USER){
+    const char * str = "http://example.com/~mkaciuba/";
     ngx_http_url url;
     int status = ngx_url_parser(&url, str);
-
     ASSERT_EQ(NGX_URL_OK, status);
-    ASSERT_STREQ(url.host, "mkaciuba.pl");
-    ASSERT_STREQ(url.schema, "https");
+    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.host, "example.com");
     ASSERT_STREQ(url.port, NULL);
-    ASSERT_STREQ(url.path, "/");
+    ASSERT_STREQ(url.auth, NULL);
+    ASSERT_STREQ(url.path, "/~mkaciuba/");
     ASSERT_STREQ(url.fragment, NULL);
-    ASSERT_STREQ(url.query, "sdfsdf?sdfsdfsd");
-    ASSERT_STREQ(url.userpass, NULL);
+    ASSERT_STREQ(url.query, NULL);
 
     ngx_url_free(&url);
 }
 
-TEST(ngx_url_parser, UrlWithUserPass) {
-
-    const char * str = "https://marcin:a@mkaciuba.pl/?sdfsdf?sdfsdfsd";
+TEST(ngx_url_parser, SW_AFTER_SLASH_IN_URI_STRANGE_CHAR2){
+    const char * str = "http://www.example.com/te%CC%81st.html";
     ngx_http_url url;
     int status = ngx_url_parser(&url, str);
-
     ASSERT_EQ(NGX_URL_OK, status);
-    ASSERT_STREQ(url.host, "mkaciuba.pl");
-    ASSERT_STREQ(url.schema, "https");
+    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.host, "www.example.com");
     ASSERT_STREQ(url.port, NULL);
-    ASSERT_STREQ(url.path, "/");
+    ASSERT_STREQ(url.auth, NULL);
+    ASSERT_STREQ(url.path, "/te%CC%81st.html");
     ASSERT_STREQ(url.fragment, NULL);
-    ASSERT_STREQ(url.query, "sdfsdf?sdfsdfsd");
-    ASSERT_STREQ(url.userpass, "marcin:a");
+    ASSERT_STREQ(url.query, NULL);
 
     ngx_url_free(&url);
 }
 
-TEST(ngx_url_parser, UrlWithUserPassNoPass) {
-
-    const char * str = "https://marcin:@mkaciuba.pl/?sdfsdf?sdfsdfsd";
+TEST(ngx_url_parser, SW_AFTER_SLASH_IN_URI_STRANGE_CHAR3){
+    const char * str = "http://www.example.com/|||";
     ngx_http_url url;
     int status = ngx_url_parser(&url, str);
-
     ASSERT_EQ(NGX_URL_OK, status);
-    ASSERT_STREQ(url.host, "mkaciuba.pl");
-    ASSERT_STREQ(url.schema, "https");
+    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.host, "www.example.com");
     ASSERT_STREQ(url.port, NULL);
-    ASSERT_STREQ(url.path, "/");
+    ASSERT_STREQ(url.auth, NULL);
+    ASSERT_STREQ(url.path, "/|||");
     ASSERT_STREQ(url.fragment, NULL);
-    ASSERT_STREQ(url.query, "sdfsdf?sdfsdfsd");
-    ASSERT_STREQ(url.userpass, "marcin:");
+    ASSERT_STREQ(url.query, NULL);
 
     ngx_url_free(&url);
 }
 
-TEST(ngx_url_parser, UrlWithUserPassNoUser) {
 
-    const char * str = "https://:pw@mkaciuba.pl/?sdfsdf?sdfsdfsd";
+TEST(ngx_url_parser, SW_AFTER_SLASH_IN_URI_STRANGE_CHAR4){
+    const char * str = "http://www.example.com/ś_,";
     ngx_http_url url;
     int status = ngx_url_parser(&url, str);
-
     ASSERT_EQ(NGX_URL_OK, status);
-    ASSERT_STREQ(url.host, "mkaciuba.pl");
-    ASSERT_STREQ(url.schema, "https");
+    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.host, "www.example.com");
     ASSERT_STREQ(url.port, NULL);
-    ASSERT_STREQ(url.path, "/");
-    ASSERT_STREQ(url.fragment, NULL);
-    ASSERT_STREQ(url.query, "sdfsdf?sdfsdfsd");
-    ASSERT_STREQ(url.userpass, ":pw");
-
-    ngx_url_free(&url);
-}
-
-TEST(ngx_url_parser, UrlWithAllParameters) {
-
-    const char * str = "https://a:pw@mkaciuba.pl:1/?cbf#abc";
-    ngx_http_url url;
-    int status = ngx_url_parser(&url, str);
-
-    ASSERT_EQ(NGX_URL_OK, status);
-    ASSERT_STREQ(url.host, "mkaciuba.pl");
-    ASSERT_STREQ(url.schema, "https");
-    ASSERT_STREQ(url.port, "1");
-    ASSERT_STREQ(url.path, "/");
-    ASSERT_STREQ(url.fragment, "abc");
-    ASSERT_STREQ(url.query, "cbf");
-    ASSERT_STREQ(url.userpass, "a:pw");
-
-    ngx_url_free(&url);
-}
-
-TEST(ngx_url_parser, OnlyPath) {
-
-    const char * str = "/a/b?x=y#test";
-    ngx_http_url url;
-    int status = ngx_url_parser(&url, str);
-
-    ASSERT_EQ(NGX_URL_OK, status);
-    ASSERT_STREQ(url.host, NULL);
-    ASSERT_STREQ(url.schema, NULL);
-    ASSERT_STREQ(url.path, "/a/b");
-    ASSERT_STREQ(url.fragment, "test");
-    ASSERT_STREQ(url.query, "x=y");
-
-    ngx_url_free(&url);
-}
-
-TEST(ngx_url_parser, OnlyPath2) {
-
-    const char * str = "/a.txt";
-    ngx_http_url url;
-    int status = ngx_url_parser(&url, str);
-
-    ASSERT_EQ(NGX_URL_OK, status);
-    ASSERT_STREQ(url.host, NULL);
-    ASSERT_STREQ(url.schema, NULL);
-    ASSERT_STREQ(url.path, "/a.txt");
+    ASSERT_STREQ(url.auth, NULL);
+    ASSERT_STREQ(url.path, "/ś_,");
     ASSERT_STREQ(url.fragment, NULL);
     ASSERT_STREQ(url.query, NULL);
 
