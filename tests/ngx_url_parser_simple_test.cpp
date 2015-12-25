@@ -8,8 +8,16 @@ TEST(ngx_url_parser, CorrectUrl) {
     const char * str = "http://mkaciuba.pl";
     ngx_http_url url;
     int status = ngx_url_parser(&url, str);
-    ngx_url_free(&url);
     ASSERT_EQ(NGX_URL_OK, status);
+    ASSERT_STREQ(url.host, "mkaciuba.pl");
+    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.port, NULL);
+    ASSERT_STREQ(url.path, NULL);
+    ASSERT_STREQ(url.query, NULL);
+    ASSERT_STREQ(url.fragment, NULL);
+    ASSERT_STREQ(url.auth, NULL);
+
+    ngx_url_free(&url);
 }
 
 TEST(ngx_url_parser, UrlWithPort) {
