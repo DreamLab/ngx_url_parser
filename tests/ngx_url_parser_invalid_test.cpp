@@ -65,7 +65,9 @@ TEST(ngx_url_parser, SW_SCHEMA_SLASH_INVALID2){
     const char * str = "htt://";
     ngx_http_url url;
     int status = ngx_url_parser(&url, str);
-    ASSERT_EQ(NGX_URL_INVALID, status);
+    ASSERT_EQ(NGX_URL_OK, status);
+
+    ASSERT_STREQ(url.schema, "htt");
 
     ngx_url_free(&url);
 }
@@ -100,8 +102,11 @@ TEST(ngx_url_parser, IncorrectUrlNoHost) {
     const char * str = "https:///a";
     ngx_http_url url;
     int status = ngx_url_parser(&url, str);
+    ASSERT_EQ(NGX_URL_OK, status);
+
+    ASSERT_STREQ(url.schema, "https");
+    ASSERT_STREQ(url.path, "/a");
     ngx_url_free(&url);
-    ASSERT_EQ(NGX_URL_INVALID, status);
 }
 
 TEST(ngx_url_parser, IncorrectUrl2) {
@@ -112,27 +117,35 @@ TEST(ngx_url_parser, IncorrectUrl2) {
     ASSERT_EQ(NGX_URL_INVALID, status);
 }
 
+/*
 TEST(ngx_url_parser, IncorrectUrl3NoPassNoUser) {
-    const char * str = "http://:ssafs/";
+    const char * str = "http://:host/";
     ngx_http_url url;
     int status = ngx_url_parser(&url, str);
     ASSERT_EQ(NGX_URL_INVALID, status);
     ngx_url_free(&url);
 }
+*/
 
 TEST(ngx_url_parser, IncorrectUrl3NoPort) {
-    const char * str = "http://ssafs:/";
+    const char * str = "http://host:/";
     ngx_http_url url;
     int status = ngx_url_parser(&url, str);
-    ASSERT_EQ(NGX_URL_INVALID, status);
+    ASSERT_EQ(NGX_URL_OK, status);
+
+    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.host, "host");
     ngx_url_free(&url);
 }
 
 TEST(ngx_url_parser, IncorrectUrl4NoPort) {
-    const char * str = "http://ssafs:";
+    const char * str = "http://host:";
     ngx_http_url url;
     int status = ngx_url_parser(&url, str);
-    ASSERT_EQ(NGX_URL_INVALID, status);
+    ASSERT_EQ(NGX_URL_OK, status);
+
+    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.host, "host");
     ngx_url_free(&url);
 }
 
