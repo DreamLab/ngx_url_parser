@@ -409,3 +409,49 @@ TEST(ngx_url_parser, FreeMemoryTwoTimes) {
     ASSERT_STREQ(url.host, NULL);
 }
 
+TEST(ngx_url_parser, OnlySchema){
+    const char * str = "htt://";
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+    ASSERT_EQ(NGX_URL_OK, status);
+
+    ASSERT_STREQ(url.schema, "htt");
+
+    ngx_url_free(&url);
+}
+
+TEST(ngx_url_parser, NoHost) {
+    const char * str = "https:///a";
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+    ASSERT_EQ(NGX_URL_OK, status);
+
+    ASSERT_STREQ(url.schema, "https");
+    ASSERT_STREQ(url.path, "/a");
+    ngx_url_free(&url);
+}
+
+
+TEST(ngx_url_parser, EmptyPort) {
+    const char * str = "http://host:/";
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+    ASSERT_EQ(NGX_URL_OK, status);
+
+    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.host, "host");
+    ASSERT_STREQ(url.port, "");
+    ngx_url_free(&url);
+}
+
+TEST(ngx_url_parser, EmptyPort2) {
+    const char * str = "http://host:";
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+    ASSERT_EQ(NGX_URL_OK, status);
+
+    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.host, "host");
+    ASSERT_STREQ(url.port, "");
+    ngx_url_free(&url);
+}
