@@ -100,16 +100,13 @@ int ngx_url_parser(ngx_http_url * url, const char *b) {
         return status;
     }
 
-    status = 0;
 
     if (meta.schema_end) {
         copy_from_meta(&(url->schema), meta.url_start, meta.schema_end);
-        status++;
     }
 
     if (meta.host_end && meta.host_end - meta.host_start > 0) {
         copy_from_meta(&url->host, meta.host_start, meta.host_end);
-        status++;
     }
 
     if (meta.uri_start) {
@@ -120,7 +117,6 @@ int ngx_url_parser(ngx_http_url * url, const char *b) {
         } else {
             copy_from_meta(&url->path, meta.uri_start, meta.uri_end);
         }
-        status += 5;
 
     }
 
@@ -132,16 +128,11 @@ int ngx_url_parser(ngx_http_url * url, const char *b) {
             copy_from_meta(&url->query, meta.args_start, meta.url_end);
         }
 
-        status += 3;
     } else if (meta.fragment_start) {
         copy_from_meta(&url->fragment, meta.fragment_start, meta.url_end);
     }
 
     if (meta.port_end) {
-
-        if (meta.host_end + 1 == meta.port_end) {
-            return NGX_URL_INVALID;
-        }
 
         // +1 skip ":"
         copy_from_meta(&url->port, meta.host_end + 1, meta.port_end);
@@ -151,11 +142,7 @@ int ngx_url_parser(ngx_http_url * url, const char *b) {
         copy_from_meta(&url->auth, meta.auth_start, meta.auth_end);
     }
 
-    if (status == 2 || status == 7 || status == 5 || status == 10 || status == 8 || status == 3) {
-        return NGX_URL_OK;
-    }
-
-    return NGX_URL_INVALID;
+    return status;
 }
 
 void ngx_url_free(ngx_http_url * url) {
