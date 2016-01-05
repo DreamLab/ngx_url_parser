@@ -39,15 +39,15 @@ typedef enum {
     sw_host_end,
     sw_host_ip_literal,
     sw_port,
-    sw_after_slash_in_uri,
-    sw_check_uri,
     sw_uri,
+    sw_args,
     sw_fragment
 } sw_state;
 
 typedef struct {
     const char * url_start;
     const char * url_end;
+    const char * schema_start;
     const char * schema_end;
     const char * host_start;
     const char * host_end;
@@ -56,7 +56,10 @@ typedef struct {
     const char * uri_start;
     const char * uri_end;
     const char * args_start;
+    const char * args_end;
     const char * fragment_start;
+    const char * fragment_end;
+    const char * port_start;
     const char * port_end;
 
 } ngx_http_url_meta ;
@@ -76,6 +79,7 @@ typedef struct {
 #define NGX_URL_OK 1
 
 extern int ngx_url_parser(ngx_http_url *r, const char *b);
+extern int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b);
 
 extern void ngx_url_free(ngx_http_url * url);
 #endif
