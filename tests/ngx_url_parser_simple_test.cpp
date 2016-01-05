@@ -20,6 +20,23 @@ TEST(ngx_url_parser, CorrectUrl) {
     ngx_url_free(&url);
 }
 
+TEST(ngx_url_parser, UrlWithEmptyFragment) {
+    const char * str = "http://mkaciuba.pl#";
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+
+    ASSERT_EQ(NGX_URL_OK, status);
+    ASSERT_STREQ(url.host, "mkaciuba.pl");
+    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.port, NULL);
+    ASSERT_STREQ(url.path, NULL);
+    ASSERT_STREQ(url.query, NULL);
+    ASSERT_STREQ(url.fragment, "");
+    ASSERT_STREQ(url.auth, NULL);
+
+    ngx_url_free(&url);
+}
+
 TEST(ngx_url_parser, UrlWithPort) {
     const char * str = "http://mkaciuba.pl:443";
     ngx_http_url url;
@@ -513,6 +530,7 @@ TEST(ngx_url_parser, NoHost) {
     ASSERT_EQ(NGX_URL_OK, status);
 
     ASSERT_STREQ(url.schema, "https");
+    ASSERT_STREQ(url.host, "");
     ASSERT_STREQ(url.path, "/a");
     ngx_url_free(&url);
 }

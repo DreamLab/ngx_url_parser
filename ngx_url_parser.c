@@ -184,6 +184,7 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b) {
 
     unsigned int len = strlen(b);
     unsigned int counter = 0;
+    unsigned int maybe_auth = 0;
 
     for (p = b; p != '\0'; p++, counter++) {
         ch = *p;
@@ -391,6 +392,10 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b) {
                     r->port_end = NULL;
                     state = sw_host_start;
                     break;
+                default:
+                    // this is ugly  but I don't want to check if there is
+                    // '@' in url
+                    maybe_auth = 1;
                 }
             break;
 
@@ -442,7 +447,6 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b) {
                 }
                 break;
 
-
         case sw_fragment:
 
             switch (ch) {
@@ -462,6 +466,12 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b) {
 done:
     if (r->url_end == NULL) {
         r->url_end = p;
+    }
+
+    // when there are alphabetic characters in port and there isn't @ in url is
+    // incorrect
+    if (maybe_auth && r->auth_end == NULL) {
+        return NGX_URL_INVALID;
     }
 
     return NGX_URL_OK;
