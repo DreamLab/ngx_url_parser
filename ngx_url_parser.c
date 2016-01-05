@@ -55,18 +55,20 @@ static uint32_t  usual[] = {
 int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b);
 
 void init_default_meta(ngx_http_url_meta *r) {
-    r->url_start = NULL;
-    r->url_end = NULL;
+    r->schema_start= NULL;
     r->schema_end = NULL;
     r->host_start = NULL;
     r->host_end = NULL;
     r->uri_start = NULL;
     r->uri_end= NULL;
     r->args_start = NULL;
+    r->args_end= NULL;
     r->fragment_start = NULL;
+    r->fragment_end= NULL;
     r->port_end = NULL;
     r->auth_start = NULL;
     r->auth_end = NULL;
+    r->url_end = NULL;
 };
 
 void init_default_url(ngx_http_url* url) {
@@ -100,42 +102,28 @@ int ngx_url_parser(ngx_http_url * url, const char *b) {
         return status;
     }
 
-
     if (meta.schema_end) {
-        copy_from_meta(&(url->schema), meta.url_start, meta.schema_end);
+        copy_from_meta(&(url->schema), meta.schema_start, meta.schema_end);
     }
 
-    if (meta.host_end && meta.host_end - meta.host_start > 0) {
+    if (meta.host_end) {
         copy_from_meta(&url->host, meta.host_start, meta.host_end);
     }
 
     if (meta.uri_start) {
-        if (meta.args_start) {
-            copy_from_meta(&url->path, meta.uri_start, meta.args_start - 1);
-        } else if (meta.fragment_start) {
-            copy_from_meta(&url->path, meta.uri_start, meta.fragment_start - 1);
-        } else {
-            copy_from_meta(&url->path, meta.uri_start, meta.uri_end);
-        }
-
+        copy_from_meta(&url->path, meta.uri_start, meta.uri_end);
     }
 
     if (meta.args_start) {
-        if (meta.fragment_start) {
-            copy_from_meta(&url->query, meta.args_start, meta.fragment_start - 1);
-            copy_from_meta(&url->fragment, meta.fragment_start, meta.url_end);
-        } else {
-            copy_from_meta(&url->query, meta.args_start, meta.url_end);
-        }
+        copy_from_meta(&url->query, meta.args_start, meta.args_end);
+    }
 
-    } else if (meta.fragment_start) {
-        copy_from_meta(&url->fragment, meta.fragment_start, meta.url_end);
+    if (meta.fragment_start) {
+        copy_from_meta(&url->fragment, meta.fragment_start, meta.fragment_end);
     }
 
     if (meta.port_end) {
-
-        // +1 skip ":"
-        copy_from_meta(&url->port, meta.host_end + 1, meta.port_end);
+        copy_from_meta(&url->port, meta.port_start, meta.port_end);
     }
 
     if (meta.auth_end) {
@@ -190,7 +178,7 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b) {
 
     init_default_meta(r);
 
-    r->url_start = b;
+    r->schema_start = b;
 
     sw_state state = sw_schema;
 
@@ -210,53 +198,53 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b) {
             }
 
             switch (ch) {
-            case ':':
-                r->schema_end = p;
-                state = sw_schema_slash;
-                break;
-            case '/':
-                state = sw_after_slash_in_uri;
-                r->uri_start = p;
-                break;
-            case '?':
-                if (counter <= len) {
-                    r->args_start = p + 1;
-                }
-                state = sw_uri;
-                break;
+                case ':':
+                    r->schema_end = p;
+                    state = sw_schema_slash;
+                    break;
+                case '/':
+                    state = sw_uri;
+                    r->uri_start = p;
+                    break;
+                case '?':
+                    if (counter <= len) {
+                        r->args_start = p + 1;
+                    }
+                    state = sw_args;
+                    break;
 
-            default:
-                #ifdef NGX_DEBUG
-                    printf("Schema isn't valid!\n");
-                #endif
-                return NGX_URL_INVALID;
+                default:
+                    #ifdef NGX_DEBUG
+                        printf("Schema isn't valid!\n");
+                    #endif
+                    return NGX_URL_INVALID;
             }
             break;
 
         case sw_schema_slash:
             switch (ch) {
-            case '/':
-                state = sw_schema_slash_slash;
-                break;
-            default:
-                #ifdef NGX_DEBUG
-                    printf("No slash after schema\n");
-                #endif
-                return NGX_URL_INVALID;
+                case '/':
+                    state = sw_schema_slash_slash;
+                    break;
+                default:
+                    #ifdef NGX_DEBUG
+                        printf("No slash after schema\n");
+                    #endif
+                    return NGX_URL_INVALID;
             }
             break;
 
         case sw_schema_slash_slash:
             switch (ch) {
-            case '/':
-                state = sw_host_start;
-                break;
-            default:
-                #ifdef NGX_DEBUG
-                    printf("No second slash after schema\n");
-                #endif
-                return NGX_URL_INVALID;
-            }
+                case '/':
+                    state = sw_host_start;
+                    break;
+                default:
+                    #ifdef NGX_DEBUG
+                        printf("No second slash after schema\n");
+                    #endif
+                    return NGX_URL_INVALID;
+                }
             break;
 
         case sw_host_start:
@@ -291,19 +279,22 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b) {
             switch (ch) {
                 case ':':
                     state = sw_port;
+                    if (counter <= len) {
+                        r->port_start = p + 1;
+                    }
                     break;
                 case '/':
                     r->uri_start = p;
-                    state = sw_after_slash_in_uri;
+                    state = sw_uri;
                     break;
                 case '?':
                     if (counter <= len) {
                         r->args_start = p + 1;
                     }
-                    state = sw_uri;
+                    state = sw_args;
                     break;
                 case '#':
-                    state = sw_uri;
+                    state = sw_fragment;
                     if (counter <= len) {
                         r->fragment_start = p + 1;
                         state = sw_fragment;
@@ -357,7 +348,7 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b) {
                     break;
                 default:
                     #ifdef NGX_DEBUG
-                        printf("Inpropert ip\n");
+                        printf("Invalid ip\n");
                     #endif
                     return NGX_URL_INVALID;
             }
@@ -376,87 +367,32 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b) {
                 case '/':
                     r->port_end = p;
                     r->uri_start = p;
-                    state = sw_after_slash_in_uri;
+                    state = sw_uri;
+                    break;
+                case '?':
+                    r->port_end = p;
+                    if (counter <= len) {
+                        r->args_start = p + 1;
+                    }
+                    state = sw_args;
+                    break;
+                case '#':
+                    r->port_end = p;
+                    if (counter <= len) {
+                        r->fragment_start= p + 1;
+                    }
+                    state = sw_fragment;
                     break;
                 case '@':
                     r->auth_end = p;
                     r->auth_start = r->host_start;
                     r->host_start = NULL;
+                    r->port_start = NULL;
                     r->port_end = NULL;
                     state = sw_host_start;
                     break;
                 }
             break;
-
-        /* check "/.", "//", "%", and "\" (Win32) in URI */
-        case sw_after_slash_in_uri:
-
-            if (usual[ch >> 5] & (1 << (ch & 0x1f))) {
-                state = sw_check_uri;
-                break;
-            }
-
-            switch (ch) {
-                case '.':
-                    state = sw_uri;
-                    break;
-                case '%':
-                    state = sw_uri;
-                    break;
-                case '/':
-                    state = sw_check_uri;
-                    break;
-                case '?':
-                    r->uri_end = p - 1;
-                    if (counter <= len) {
-                        r->args_start = p + 1;
-                    }
-                    state = sw_uri;
-                    break;
-                case '#':
-                    state = sw_uri;
-                    if (counter <= len) {
-                        r->fragment_start = p + 1;
-                        state = sw_fragment;
-                    }
-                    break;
-                case '+':
-                    break;
-                case '\0':
-                    r->uri_end = p;
-                    goto done;
-                default:
-                    state = sw_check_uri;
-                    break;
-            }
-            break;
-
-        /* check "/", "%" and "\" (Win32) in URI */
-        case sw_check_uri:
-            if (usual[ch >> 5] & (1 << (ch & 0x1f))) {
-                break;
-            }
-
-            switch (ch) {
-                case '/':
-                    state = sw_after_slash_in_uri;
-                    break;
-                case '%':
-                    state = sw_uri;
-                    break;
-                case '?':
-                    if (counter <= len) {
-                        r->args_start = p + 1;
-                    }
-                    state = sw_uri;
-                    break;
-                case '\0':
-                    r->uri_end = p;
-                    goto done;
-                    break;
-            }
-            break;
-
 
         /* URI */
         case sw_uri:
@@ -470,19 +406,48 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b) {
                     r->uri_end = p;
                     goto done;
                 case '#':
+                    r->uri_end = p;
                     if (counter <= len) {
                         r->fragment_start = p + 1;
                         state = sw_fragment;
                     }
                     break;
+                case '?':
+                    r->uri_end = p;
+                    if (counter <= len) {
+                        r->args_start = p + 1;
+                    }
+                    state = sw_args;
+                    break;
                 }
             break;
+
+            case sw_args:
+                if (usual[ch >> 5] & (1 << (ch & 0x1f))) {
+                    break;
+                }
+
+                switch (ch) {
+                    case '#':
+                        r->args_end = p;
+                        if (counter <= len) {
+                            r->fragment_start= p + 1;
+                        }
+                        state = sw_fragment;
+                        break;
+                    case '\0':
+                        r->args_end = p;
+                        goto done;
+                        break;
+                }
+                break;
+
 
         case sw_fragment:
 
             switch (ch) {
                 case '\0':
-                    r->uri_end = p;
+                    r->fragment_end = p;
                     goto done;
                 }
             break;

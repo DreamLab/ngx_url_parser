@@ -36,6 +36,75 @@ TEST(ngx_url_parser, UrlWithPort) {
 
     ngx_url_free(&url);
 }
+
+TEST(ngx_url_parser, UrlWithPortFragmentAfter) {
+    const char * str = "http://mkaciuba.pl:443#fragment";
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+
+    ASSERT_EQ(NGX_URL_OK, status);
+    ASSERT_STREQ(url.host, "mkaciuba.pl");
+    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.port, "443");
+    ASSERT_STREQ(url.path, NULL);
+    ASSERT_STREQ(url.query, NULL);
+    ASSERT_STREQ(url.fragment, "fragment");
+    ASSERT_STREQ(url.auth, NULL);
+
+    ngx_url_free(&url);
+}
+
+TEST(ngx_url_parser, UrlWithPortFragmentAfter2) {
+    const char * str = "http://mkaciuba.pl:443#";
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+
+    ASSERT_EQ(NGX_URL_OK, status);
+    ASSERT_STREQ(url.host, "mkaciuba.pl");
+    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.port, "443");
+    ASSERT_STREQ(url.path, NULL);
+    ASSERT_STREQ(url.query, NULL);
+    ASSERT_STREQ(url.fragment, "");
+    ASSERT_STREQ(url.auth, NULL);
+
+    ngx_url_free(&url);
+}
+
+TEST(ngx_url_parser, UrlWithPortQueryAfter) {
+    const char * str = "http://mkaciuba.pl:443?query";
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+
+    ASSERT_EQ(NGX_URL_OK, status);
+    ASSERT_STREQ(url.host, "mkaciuba.pl");
+    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.port, "443");
+    ASSERT_STREQ(url.path, NULL);
+    ASSERT_STREQ(url.query, "query");
+    ASSERT_STREQ(url.fragment, NULL);
+    ASSERT_STREQ(url.auth, NULL);
+
+    ngx_url_free(&url);
+}
+
+TEST(ngx_url_parser, UrlWithPortQueryAfter2) {
+    const char * str = "http://mkaciuba.pl:443?";
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+
+    ASSERT_EQ(NGX_URL_OK, status);
+    ASSERT_STREQ(url.host, "mkaciuba.pl");
+    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.port, "443");
+    ASSERT_STREQ(url.path, NULL);
+    ASSERT_STREQ(url.query, "");
+    ASSERT_STREQ(url.fragment, NULL);
+    ASSERT_STREQ(url.auth, NULL);
+
+    ngx_url_free(&url);
+}
+
 TEST(ngx_url_parser, UrlWithPort2) {
     const char * str = "http://mkaciuba.pl:4";
     ngx_http_url url;
