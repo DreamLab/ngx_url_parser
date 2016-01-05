@@ -26,11 +26,11 @@ script:
     # Test build using autotools
     - rm -f Makefile
     - ./autogen.sh
-    - ./configure --prefix=/tmp/ngx_url_parser
-    - make
-    - test -d /tmp/ngx_url_parser/lib
-    - test -d /tmp/ngx_url_parser/include
-    - test -f /tmp/ngx_url_parser/include/ngx_url_parser.h
-    - test -f /tmp/ngx_url_parser/lib/libngx_url_parser.a
+    - ./configure --prefix=/tmp/ngx_url_parser-ci
+    - make clean install
+    - test -d /tmp/ngx_url_parser-ci/lib
+    - test -d /tmp/ngx_url_parser-ci/include
+    - test -f /tmp/ngx_url_parser-ci/include/ngx_url_parser/ngx_url_parser.h
+    - test -f /tmp/ngx_url_parser-ci/lib/libngx_url_parser.a
 after_success:
     - coveralls -i ngx_url_parser.c  --exclude tests -b tests/CMakeFiles/unit_tests.dir --gcov-options '\-lp'
