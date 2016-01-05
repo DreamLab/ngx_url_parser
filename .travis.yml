@@ -6,15 +6,16 @@ before_install:
     - sudo apt-get install lcov
     - sudo pip install cpp-coveralls
     - sudo pip install gcovr
-    # tests
+
+    # gtests
     - sudo apt-get install libgtest-dev
+    - "cd /usr/src/gtest && sudo cmake . && sudo cmake --build . && sudo mv libg* /usr/local/lib/ ; cd -"
+
     # autotools
     - sudo apt-get install automake
     - sudo apt-get install autoconf
     - sudo apt-get install libtool
     - sudo apt-get install pkg-config
-script:
-    - "cd /usr/src/gtest && sudo cmake . && sudo cmake --build . && sudo mv libg* /usr/local/lib/ ; cd -"
 script:
     - rm -f makefile
     - cmake CMakeLists.txt -DNGX_URL_TESTS_COVERAGE=ON -DBUILD_TESTS=ON
