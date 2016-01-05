@@ -2,10 +2,18 @@ language:
     - cpp
 before_install:
     - sudo apt-get update
+    # coverage
     - sudo apt-get install lcov
     - sudo pip install cpp-coveralls
     - sudo pip install gcovr
+    # tests
     - sudo apt-get install libgtest-dev
+    # autotools
+    - sudo apt-get install automake
+    - sudo apt-get install autoconf
+    - sudo apt-get install libtool
+    - sudo apt-get install pkg-config
+script:
     - "cd /usr/src/gtest && sudo cmake . && sudo cmake --build . && sudo mv libg* /usr/local/lib/ ; cd -"
 script:
     - rm -f makefile
@@ -13,5 +21,14 @@ script:
     - make
     - make coverage
     - ./tests/unit_tests
+
+    # Test build using autotools
+    - rm -f Makefile
+    - ./configure --with-prefix=/tmp/ngx_url_parser
+    - make
+    - test ! -d /tmp/ngx_url_parser/lib
+    - test ! -d /tmp/ngx_url_parser/include
+    - test ! -f /tmp/ngx_url_parser/include/ngx_url_parser.h
+    - test ! -f /tmp/ngx_url_parser/lib/libngx_url_parser.a
 after_success:
     - coveralls -i ngx_url_parser.c  --exclude tests -b tests/CMakeFiles/unit_tests.dir --gcov-options '\-lp'
