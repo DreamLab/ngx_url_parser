@@ -55,8 +55,8 @@ static uint32_t  usual[] = {
 int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b);
 
 void init_default_meta(ngx_http_url_meta *r) {
-    r->schema_start= NULL;
-    r->schema_end = NULL;
+    r->scheme_start= NULL;
+    r->scheme_end = NULL;
     r->host_start = NULL;
     r->host_end = NULL;
     r->uri_start = NULL;
@@ -72,7 +72,7 @@ void init_default_meta(ngx_http_url_meta *r) {
 };
 
 void init_default_url(ngx_http_url* url) {
-    url->schema = NULL;
+    url->scheme = NULL;
     url->host = NULL;
     url->path = NULL;
     url->query = NULL;
@@ -102,8 +102,8 @@ int ngx_url_parser(ngx_http_url * url, const char *b) {
         return status;
     }
 
-    if (meta.schema_end) {
-        copy_from_meta(&(url->schema), meta.schema_start, meta.schema_end);
+    if (meta.scheme_end) {
+        copy_from_meta(&(url->scheme), meta.scheme_start, meta.scheme_end);
     }
 
     if (meta.host_end) {
@@ -135,9 +135,9 @@ int ngx_url_parser(ngx_http_url * url, const char *b) {
 
 void ngx_url_free(ngx_http_url * url) {
 
-    if (url->schema != NULL) {
-        free((void*)url->schema);
-        url->schema = NULL;
+    if (url->scheme != NULL) {
+        free((void*)url->scheme);
+        url->scheme = NULL;
     }
 
     if (url->host != NULL) {
@@ -178,9 +178,9 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b) {
 
     init_default_meta(r);
 
-    r->schema_start = b;
+    r->scheme_start = b;
 
-    sw_state state = sw_schema;
+    sw_state state = sw_scheme;
 
     unsigned int len = strlen(b);
     unsigned int counter = 0;
@@ -191,7 +191,7 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b) {
 
         switch (state) {
 
-        case sw_schema:
+        case sw_scheme:
 
             c = (u_char) (ch | 0x20);
             if (c >= 'a' && c <= 'z') {
@@ -200,8 +200,8 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b) {
 
             switch (ch) {
                 case ':':
-                    r->schema_end = p;
-                    state = sw_schema_slash;
+                    r->scheme_end = p;
+                    state = sw_scheme_slash;
                     break;
                 case '/':
                     state = sw_uri;
@@ -216,33 +216,33 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b) {
 
                 default:
                     #ifdef NGX_DEBUG
-                        printf("Schema isn't valid!\n");
+                        printf("scheme isn't valid!\n");
                     #endif
                     return NGX_URL_INVALID;
             }
             break;
 
-        case sw_schema_slash:
+        case sw_scheme_slash:
             switch (ch) {
                 case '/':
-                    state = sw_schema_slash_slash;
+                    state = sw_scheme_slash_slash;
                     break;
                 default:
                     #ifdef NGX_DEBUG
-                        printf("No slash after schema\n");
+                        printf("No slash after scheme\n");
                     #endif
                     return NGX_URL_INVALID;
             }
             break;
 
-        case sw_schema_slash_slash:
+        case sw_scheme_slash_slash:
             switch (ch) {
                 case '/':
                     state = sw_host_start;
                     break;
                 default:
                     #ifdef NGX_DEBUG
-                        printf("No second slash after schema\n");
+                        printf("No second slash after scheme\n");
                     #endif
                     return NGX_URL_INVALID;
                 }

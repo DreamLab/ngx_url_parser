@@ -10,7 +10,7 @@ TEST(ngx_url_parser, CorrectUrl) {
     int status = ngx_url_parser(&url, str);
     ASSERT_EQ(NGX_URL_OK, status);
     ASSERT_STREQ(url.host, "mkaciuba.pl");
-    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.scheme, "http");
     ASSERT_STREQ(url.port, NULL);
     ASSERT_STREQ(url.path, NULL);
     ASSERT_STREQ(url.query, NULL);
@@ -27,7 +27,7 @@ TEST(ngx_url_parser, UrlWithEmptyFragment) {
 
     ASSERT_EQ(NGX_URL_OK, status);
     ASSERT_STREQ(url.host, "mkaciuba.pl");
-    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.scheme, "http");
     ASSERT_STREQ(url.port, NULL);
     ASSERT_STREQ(url.path, NULL);
     ASSERT_STREQ(url.query, NULL);
@@ -44,7 +44,7 @@ TEST(ngx_url_parser, UrlWithPort) {
 
     ASSERT_EQ(NGX_URL_OK, status);
     ASSERT_STREQ(url.host, "mkaciuba.pl");
-    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.scheme, "http");
     ASSERT_STREQ(url.port, "443");
     ASSERT_STREQ(url.path, NULL);
     ASSERT_STREQ(url.query, NULL);
@@ -61,7 +61,7 @@ TEST(ngx_url_parser, UrlWithPortFragmentAfter) {
 
     ASSERT_EQ(NGX_URL_OK, status);
     ASSERT_STREQ(url.host, "mkaciuba.pl");
-    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.scheme, "http");
     ASSERT_STREQ(url.port, "443");
     ASSERT_STREQ(url.path, NULL);
     ASSERT_STREQ(url.query, NULL);
@@ -78,7 +78,7 @@ TEST(ngx_url_parser, UrlWithPortFragmentAfter2) {
 
     ASSERT_EQ(NGX_URL_OK, status);
     ASSERT_STREQ(url.host, "mkaciuba.pl");
-    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.scheme, "http");
     ASSERT_STREQ(url.port, "443");
     ASSERT_STREQ(url.path, NULL);
     ASSERT_STREQ(url.query, NULL);
@@ -95,7 +95,7 @@ TEST(ngx_url_parser, UrlWithPortQueryAfter) {
 
     ASSERT_EQ(NGX_URL_OK, status);
     ASSERT_STREQ(url.host, "mkaciuba.pl");
-    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.scheme, "http");
     ASSERT_STREQ(url.port, "443");
     ASSERT_STREQ(url.path, NULL);
     ASSERT_STREQ(url.query, "query");
@@ -112,7 +112,7 @@ TEST(ngx_url_parser, UrlWithPortQueryAfter2) {
 
     ASSERT_EQ(NGX_URL_OK, status);
     ASSERT_STREQ(url.host, "mkaciuba.pl");
-    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.scheme, "http");
     ASSERT_STREQ(url.port, "443");
     ASSERT_STREQ(url.path, NULL);
     ASSERT_STREQ(url.query, "");
@@ -129,7 +129,7 @@ TEST(ngx_url_parser, UrlWithPort2) {
 
     ASSERT_EQ(NGX_URL_OK, status);
     ASSERT_STREQ(url.host, "mkaciuba.pl");
-    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.scheme, "http");
     ASSERT_STREQ(url.port, "4");
     ASSERT_STREQ(url.path, NULL);
     ASSERT_STREQ(url.query, NULL);
@@ -146,7 +146,7 @@ TEST(ngx_url_parser, UrlWithPortAndPath) {
 
     ASSERT_EQ(NGX_URL_OK, status);
     ASSERT_STREQ(url.host, "mkaciuba.pl");
-    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.scheme, "http");
     ASSERT_STREQ(url.port, "443");
     ASSERT_STREQ(url.path, "/");
     ASSERT_STREQ(url.query, NULL);
@@ -163,7 +163,7 @@ TEST(ngx_url_parser, UrlWithPath) {
 
     ASSERT_EQ(NGX_URL_OK, status);
     ASSERT_STREQ(url.host, "mkaciuba.pl");
-    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.scheme, "http");
     ASSERT_STREQ(url.port, NULL);
     ASSERT_STREQ(url.path, "/");
     ASSERT_STREQ(url.query, NULL);
@@ -180,7 +180,7 @@ TEST(ngx_url_parser, UrlWithPath2) {
 
     ASSERT_EQ(NGX_URL_OK, status);
     ASSERT_STREQ(url.host, "mkaciuba.pl");
-    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.scheme, "http");
     ASSERT_STREQ(url.port, NULL);
     ASSERT_STREQ(url.path, "/X");
     ASSERT_STREQ(url.query, NULL);
@@ -197,7 +197,7 @@ TEST(ngx_url_parser, UrlWithPathAndQuery) {
 
     ASSERT_EQ(NGX_URL_OK, status);
     ASSERT_STREQ(url.host, "mkaciuba.pl");
-    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.scheme, "http");
     ASSERT_STREQ(url.port, NULL);
     ASSERT_STREQ(url.path, "/");
     ASSERT_STREQ(url.query, "a=2&b[]=1");
@@ -214,7 +214,7 @@ TEST(ngx_url_parser, UrlWithPathAndQuery2) {
 
     ASSERT_EQ(NGX_URL_OK, status);
     ASSERT_STREQ(url.host, "mkaciuba.pl");
-    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.scheme, "http");
     ASSERT_STREQ(url.port, NULL);
     ASSERT_STREQ(url.path, "/d/b/");
     ASSERT_STREQ(url.query, "a=2&b[]=1");
@@ -231,7 +231,7 @@ TEST(ngx_url_parser, UrlWithPathAndQuery3) {
 
     ASSERT_EQ(NGX_URL_OK, status);
     ASSERT_STREQ(url.host, "mkaciuba.pl");
-    ASSERT_STREQ(url.schema, "https");
+    ASSERT_STREQ(url.scheme, "https");
     ASSERT_STREQ(url.port, NULL);
     ASSERT_STREQ(url.path, "/d/b");
     ASSERT_STREQ(url.query, "a=2&b[]=1");
@@ -248,7 +248,7 @@ TEST(ngx_url_parser, UrlWithPathAndFragment) {
 
     ASSERT_EQ(NGX_URL_OK, status);
     ASSERT_STREQ(url.host, "mkaciuba.pl");
-    ASSERT_STREQ(url.schema, "https");
+    ASSERT_STREQ(url.scheme, "https");
     ASSERT_STREQ(url.fragment, "test");
     ASSERT_STREQ(url.port, NULL);
     ASSERT_STREQ(url.path, "/");
@@ -265,7 +265,7 @@ TEST(ngx_url_parser, UrlWithQuery) {
 
     ASSERT_EQ(NGX_URL_OK, status);
     ASSERT_STREQ(url.host, "mkaciuba.pl");
-    ASSERT_STREQ(url.schema, "https");
+    ASSERT_STREQ(url.scheme, "https");
     ASSERT_STREQ(url.fragment, NULL);
     ASSERT_STREQ(url.port, NULL);
     ASSERT_STREQ(url.path, NULL);
@@ -282,7 +282,7 @@ TEST(ngx_url_parser, UrlWithQuery2) {
 
     ASSERT_EQ(NGX_URL_OK, status);
     ASSERT_STREQ(url.host, "mkaciuba.pl");
-    ASSERT_STREQ(url.schema, "https");
+    ASSERT_STREQ(url.scheme, "https");
     ASSERT_STREQ(url.fragment, NULL);
     ASSERT_STREQ(url.port, NULL);
     ASSERT_STREQ(url.path, NULL);
@@ -299,7 +299,7 @@ TEST(ngx_url_parser, UrlWithFragment) {
 
     ASSERT_EQ(NGX_URL_OK, status);
     ASSERT_STREQ(url.host, "mkaciuba.pl");
-    ASSERT_STREQ(url.schema, "https");
+    ASSERT_STREQ(url.scheme, "https");
     ASSERT_STREQ(url.query, NULL);
     ASSERT_STREQ(url.port, NULL);
     ASSERT_STREQ(url.path, NULL);
@@ -316,7 +316,7 @@ TEST(ngx_url_parser, UrlWithRandomQuery) {
 
     ASSERT_EQ(NGX_URL_OK, status);
     ASSERT_STREQ(url.host, "mkaciuba.pl");
-    ASSERT_STREQ(url.schema, "https");
+    ASSERT_STREQ(url.scheme, "https");
     ASSERT_STREQ(url.port, NULL);
     ASSERT_STREQ(url.path, "/");
     ASSERT_STREQ(url.fragment, NULL);
@@ -334,7 +334,7 @@ TEST(ngx_url_parser, UrlWithauth) {
 
     ASSERT_EQ(NGX_URL_OK, status);
     ASSERT_STREQ(url.host, "mkaciuba.pl");
-    ASSERT_STREQ(url.schema, "https");
+    ASSERT_STREQ(url.scheme, "https");
     ASSERT_STREQ(url.port, NULL);
     ASSERT_STREQ(url.path, "/");
     ASSERT_STREQ(url.fragment, NULL);
@@ -352,7 +352,7 @@ TEST(ngx_url_parser, UrlWithauthNoPass) {
 
     ASSERT_EQ(NGX_URL_OK, status);
     ASSERT_STREQ(url.host, "mkaciuba.pl");
-    ASSERT_STREQ(url.schema, "https");
+    ASSERT_STREQ(url.scheme, "https");
     ASSERT_STREQ(url.port, NULL);
     ASSERT_STREQ(url.path, "/");
     ASSERT_STREQ(url.fragment, NULL);
@@ -370,7 +370,7 @@ TEST(ngx_url_parser, UrlWithauthNoUser) {
 
     ASSERT_EQ(NGX_URL_OK, status);
     ASSERT_STREQ(url.host, "mkaciuba.pl");
-    ASSERT_STREQ(url.schema, "https");
+    ASSERT_STREQ(url.scheme, "https");
     ASSERT_STREQ(url.port, NULL);
     ASSERT_STREQ(url.path, "/");
     ASSERT_STREQ(url.fragment, NULL);
@@ -388,7 +388,7 @@ TEST(ngx_url_parser, UrlWithAllParameters) {
 
     ASSERT_EQ(NGX_URL_OK, status);
     ASSERT_STREQ(url.host, "mkaciuba.pl");
-    ASSERT_STREQ(url.schema, "https");
+    ASSERT_STREQ(url.scheme, "https");
     ASSERT_STREQ(url.port, "1");
     ASSERT_STREQ(url.path, "/");
     ASSERT_STREQ(url.fragment, "abc");
@@ -406,7 +406,7 @@ TEST(ngx_url_parser, OnlyPath) {
 
     ASSERT_EQ(NGX_URL_OK, status);
     ASSERT_STREQ(url.host, NULL);
-    ASSERT_STREQ(url.schema, NULL);
+    ASSERT_STREQ(url.scheme, NULL);
     ASSERT_STREQ(url.path, "/a/b");
     ASSERT_STREQ(url.fragment, "test");
     ASSERT_STREQ(url.query, "x=y");
@@ -422,7 +422,7 @@ TEST(ngx_url_parser, OnlyPath2) {
 
     ASSERT_EQ(NGX_URL_OK, status);
     ASSERT_STREQ(url.host, NULL);
-    ASSERT_STREQ(url.schema, NULL);
+    ASSERT_STREQ(url.scheme, NULL);
     ASSERT_STREQ(url.path, "/a.txt");
     ASSERT_STREQ(url.fragment, NULL);
     ASSERT_STREQ(url.query, NULL);
@@ -438,7 +438,7 @@ TEST(ngx_url_parser, DuplicatedSlash) {
 
     ASSERT_EQ(NGX_URL_OK, status);
     ASSERT_STREQ(url.host, "10.177.51.76");
-    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.scheme, "http");
     ASSERT_STREQ(url.path, "/example//dir/hi");
     ASSERT_STREQ(url.fragment, NULL);
     ASSERT_STREQ(url.query, NULL);
@@ -454,7 +454,7 @@ TEST(ngx_url_parser, LongUrl) {
 
     ASSERT_EQ(NGX_URL_OK, status);
     ASSERT_STREQ(url.host, "10.177.51.76");
-    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.scheme, "http");
     ASSERT_STREQ(url.query, "y_ac&yr&ffffflllllllllllloooooooooooooooooooongggggggg%d%g$d1S");
     ASSERT_STREQ(url.path, "/v2//v2");
 
@@ -469,7 +469,7 @@ TEST(ngx_url_parser, UrlFromExample) {
 
     ASSERT_EQ(NGX_URL_OK, status);
     ASSERT_STREQ(url.host, "mkaciuba.pl");
-    ASSERT_STREQ(url.schema, "https");
+    ASSERT_STREQ(url.scheme, "https");
     ASSERT_STREQ(url.path, "/path/");
     ASSERT_STREQ(url.fragment, "fragment");
     ASSERT_STREQ(url.query, "query");
@@ -487,7 +487,7 @@ TEST(ngx_url_parser, FreeMemoryTwoTimes) {
     ngx_url_free(&url);
     ngx_url_free(&url);
     ASSERT_EQ(NGX_URL_OK, status);
-    ASSERT_STREQ(url.schema, NULL);
+    ASSERT_STREQ(url.scheme, NULL);
     ASSERT_STREQ(url.path, NULL);
     ASSERT_STREQ(url.fragment, NULL);
     ASSERT_STREQ(url.query, NULL);
@@ -503,7 +503,7 @@ TEST(ngx_url_parser, TestUrl) {
 
     ASSERT_EQ(NGX_URL_OK, status);
     ASSERT_STREQ(url.host, "10.177.51.76");
-    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.scheme, "http");
     ASSERT_STREQ(url.port, "1337");
     ASSERT_STREQ(url.path, "//example/dir/hi");
     ASSERT_STREQ(url.fragment, NULL);
@@ -512,13 +512,13 @@ TEST(ngx_url_parser, TestUrl) {
     ngx_url_free(&url);
 }
 
-TEST(ngx_url_parser, OnlySchema){
+TEST(ngx_url_parser, Onlyscheme){
     const char * str = "htt://";
     ngx_http_url url;
     int status = ngx_url_parser(&url, str);
     ASSERT_EQ(NGX_URL_OK, status);
 
-    ASSERT_STREQ(url.schema, "htt");
+    ASSERT_STREQ(url.scheme, "htt");
 
     ngx_url_free(&url);
 }
@@ -529,7 +529,7 @@ TEST(ngx_url_parser, NoHost) {
     int status = ngx_url_parser(&url, str);
     ASSERT_EQ(NGX_URL_OK, status);
 
-    ASSERT_STREQ(url.schema, "https");
+    ASSERT_STREQ(url.scheme, "https");
     ASSERT_STREQ(url.host, "");
     ASSERT_STREQ(url.path, "/a");
     ngx_url_free(&url);
@@ -542,7 +542,7 @@ TEST(ngx_url_parser, EmptyPort) {
     int status = ngx_url_parser(&url, str);
     ASSERT_EQ(NGX_URL_OK, status);
 
-    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.scheme, "http");
     ASSERT_STREQ(url.host, "host");
     ASSERT_STREQ(url.port, "");
     ngx_url_free(&url);
@@ -554,7 +554,7 @@ TEST(ngx_url_parser, EmptyPort2) {
     int status = ngx_url_parser(&url, str);
     ASSERT_EQ(NGX_URL_OK, status);
 
-    ASSERT_STREQ(url.schema, "http");
+    ASSERT_STREQ(url.scheme, "http");
     ASSERT_STREQ(url.host, "host");
     ASSERT_STREQ(url.port, "");
     ngx_url_free(&url);

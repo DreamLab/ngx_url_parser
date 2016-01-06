@@ -31,9 +31,9 @@
 /* #define NGX_DEBUG 0 */
 
 typedef enum {
-    sw_schema = 0,
-    sw_schema_slash,
-    sw_schema_slash_slash,
+    sw_scheme = 0,
+    sw_scheme_slash,
+    sw_scheme_slash_slash,
     sw_host_start,
     sw_host,
     sw_host_end,
@@ -47,8 +47,8 @@ typedef enum {
 typedef struct {
     const char * url_start;
     const char * url_end;
-    const char * schema_start;
-    const char * schema_end;
+    const char * scheme_start;
+    const char * scheme_end;
     const char * host_start;
     const char * host_end;
     const char * auth_start;
@@ -65,7 +65,7 @@ typedef struct {
 } ngx_http_url_meta ;
 
 typedef struct {
-    char * schema;
+    char * scheme;
     char * host;
     char * path;
     char * query;
