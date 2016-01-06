@@ -24,7 +24,7 @@ if (status != NGX_URL_OK) {
 
 printf("Url = %s\n", str);
 printf("\nParse status %d", status);
-printf("\n Schema = %s", url.schema);
+printf("\n scheme = %s", url.scheme);
 printf("\n Host = %s", url.host);
 printf("\n Port = %s", url.port);
 printf("\n Path = %s", url.path);

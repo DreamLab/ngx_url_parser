@@ -96,7 +96,6 @@ TEST(ngx_url_parser, IncorrectUrl2) {
     ASSERT_EQ(NGX_URL_INVALID, status);
 }
 
-/* This url is invalid but for now i can't find solution for this.
 TEST(ngx_url_parser, IncorrectUrl3NoPassNoUser) {
     const char * str = "http://:host/";
     ngx_http_url url;
@@ -104,7 +103,6 @@ TEST(ngx_url_parser, IncorrectUrl3NoPassNoUser) {
     ASSERT_EQ(NGX_URL_INVALID, status);
     ngx_url_free(&url);
 }
-*/
 
 TEST(ngx_url_parser, UrlInvalidTwoAt) {
 
