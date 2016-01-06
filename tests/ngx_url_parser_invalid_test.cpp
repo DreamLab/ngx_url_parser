@@ -126,3 +126,11 @@ TEST(ngx_url_parser, InvalidPathTylda){
     ngx_url_free(&url);
 }
 
+TEST(ngx_url_parser, PortNotNumber){
+    const char * str = "http://[::192.9.5.5]:80a4";
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+    ASSERT_EQ(NGX_URL_INVALID, status);
+
+    ngx_url_free(&url);
+}
