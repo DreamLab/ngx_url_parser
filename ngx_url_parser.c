@@ -226,6 +226,7 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b) {
                     r->uri_start = r->url_start;
                     r->uri_end = p;
                     goto done;
+                    break;
                 default:
                     state = sw_uri;
                     r->uri_start = r->url_start;
