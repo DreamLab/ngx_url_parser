@@ -606,3 +606,98 @@ TEST(ngx_url_parser_simple, EmptyPort2) {
     ASSERT_STREQ(url.port, "");
     ngx_url_free(&url);
 }
+
+TEST(ngx_url_parser_simple, SimpleUrl) {
+    const char * str = "https://www.dreamlab.pl:81/path/index.html";
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+    ASSERT_EQ(NGX_URL_OK, status);
+
+    ASSERT_STREQ(url.scheme, "https");
+    ASSERT_STREQ(url.host, "www.dreamlab.pl");
+    ASSERT_STREQ(url.port, "81");
+    ASSERT_STREQ(url.path, "/path/index.html");
+    ASSERT_STREQ(url.fragment, NULL);
+    ASSERT_STREQ(url.auth, NULL);
+    ngx_url_free(&url);
+}
+
+TEST(ngx_url_parser_simple, UrlWithAuth) {
+    const char * str = "https://user:password@www.dreamlab.pl:81/path/index.html?arg1=1&arg2=2";
+
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+    ASSERT_EQ(NGX_URL_OK, status);
+
+    ASSERT_STREQ(url.scheme, "https");
+    ASSERT_STREQ(url.host, "www.dreamlab.pl");
+    ASSERT_STREQ(url.port, "81");
+    ASSERT_STREQ(url.path, "/path/index.html");
+    ASSERT_STREQ(url.fragment, NULL);
+    ASSERT_STREQ(url.auth, "user:password");
+    ngx_url_free(&url);
+}
+
+TEST(ngx_url_parser_simple, OnlyFragment) {
+    const char * str = "#1fragment";
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+    ASSERT_EQ(NGX_URL_OK, status);
+
+    ASSERT_STREQ(url.scheme, NULL);
+    ASSERT_STREQ(url.host, NULL);
+    ASSERT_STREQ(url.port, NULL);
+    ASSERT_STREQ(url.path, NULL);
+    ASSERT_STREQ(url.fragment, "1fragment");
+    ASSERT_STREQ(url.auth, NULL);
+    ngx_url_free(&url);
+}
+
+TEST(ngx_url_parser_simple, OnlyQuery) {
+    const char * str = "?query/";
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+    ASSERT_EQ(NGX_URL_OK, status);
+
+    ASSERT_STREQ(url.scheme, NULL);
+    ASSERT_STREQ(url.host, NULL);
+    ASSERT_STREQ(url.port, NULL);
+    ASSERT_STREQ(url.path, NULL);
+    ASSERT_STREQ(url.fragment, NULL);
+    ASSERT_STREQ(url.query, "query/");
+    ASSERT_STREQ(url.auth, NULL);
+    ngx_url_free(&url);
+}
+
+TEST(ngx_url_parser_simple, UnderscoreInHost) {
+    const char * str = "https://www.dreamlab_.pl:81/path/index.html?arg1=1&arg2=2";
+
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+    ASSERT_EQ(NGX_URL_OK, status);
+
+    ASSERT_STREQ(url.scheme, "https");
+    ASSERT_STREQ(url.host, "www.dreamlab_.pl");
+    ASSERT_STREQ(url.port, "81");
+    ASSERT_STREQ(url.path, "/path/index.html");
+    ASSERT_STREQ(url.fragment, NULL);
+    ASSERT_STREQ(url.auth, NULL);
+    ngx_url_free(&url);
+}
+
+TEST(ngx_url_parser_simple, EmptyString) {
+    const char * str = "";
+
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+    ASSERT_EQ(NGX_URL_OK, status);
+
+    ASSERT_STREQ(url.scheme, NULL);
+    ASSERT_STREQ(url.host, NULL);
+    ASSERT_STREQ(url.port, NULL);
+    ASSERT_STREQ(url.path, "");
+    ASSERT_STREQ(url.fragment, NULL);
+    ASSERT_STREQ(url.auth, NULL);
+    ngx_url_free(&url);
+}
+

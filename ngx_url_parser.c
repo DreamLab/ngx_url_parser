@@ -216,12 +216,21 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b) {
                     }
                     state = sw_args;
                     break;
-
+                case '#':
+                    if (counter <= len) {
+                        r->fragment_start = p + 1;
+                    }
+                    state = sw_fragment;
+                    break;
+                case '\0':
+                    r->uri_start = r->url_start;
+                    r->uri_end = p;
+                    goto done;
+                    break;
                 default:
                     state = sw_uri;
                     r->uri_start = r->url_start;
                     break;
-
             }
             break;
 
@@ -271,7 +280,7 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b) {
                 break;
             }
 
-            if ((ch >= '0' && ch <= '9') || ch == '.' || ch == '-') {
+            if ((ch >= '0' && ch <= '9') || ch == '.' || ch == '-' || ch == '_') {
                 break;
             }
 
@@ -391,6 +400,7 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b) {
                     r->auth_end = p;
                     r->auth_start = r->host_start;
                     r->host_start = NULL;
+                    r->host_end = NULL;
                     r->port_start = NULL;
                     r->port_end = NULL;
                     state = sw_host_start;
@@ -402,7 +412,7 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b) {
                 }
             break;
 
-        /* URI */
+        /* URI path */
         case sw_uri:
 
             if (usual[ch >> 5] & (1 << (ch & 0x1f))) {
@@ -413,6 +423,7 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b) {
                 case '\0':
                     r->uri_end = p;
                     goto done;
+                    break;
                 case '#':
                     r->uri_end = p;
                     if (counter <= len) {
