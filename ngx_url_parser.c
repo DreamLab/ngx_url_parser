@@ -250,13 +250,7 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b) {
 
         case sw_scheme_slash_slash:
 
-            c = (u_char) (ch | 0x20);
-            if (c >= 'a' && c <= 'z') {
-                state = sw_uri;
-                break;
-            }
-
-            if ((ch >= '0' && ch <= '9') || ch == '.' || ch == '-' || ch == '_') {
+            if (ch != '/' && (usual[ch >> 5] & (1 << (ch & 0x1f)))) {
                 state = sw_uri;
                 break;
             }

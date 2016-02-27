@@ -796,3 +796,19 @@ TEST(ngx_url_parser_simple, OnlyPathWithSlash) {
     ASSERT_STREQ(url.auth, NULL);
     ngx_url_free(&url);
 }
+
+TEST(ngx_url_parser_simple, PathSpecialChar) {
+    const char * str = "/^&*";
+
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+    ASSERT_EQ(NGX_URL_OK, status);
+
+    ASSERT_STREQ(url.scheme, NULL);
+    ASSERT_STREQ(url.host, NULL);
+    ASSERT_STREQ(url.port, NULL);
+    ASSERT_STREQ(url.path, "/^&*");
+    ASSERT_STREQ(url.fragment, NULL);
+    ASSERT_STREQ(url.auth, NULL);
+    ngx_url_free(&url);
+}
