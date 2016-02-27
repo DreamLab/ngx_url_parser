@@ -701,3 +701,82 @@ TEST(ngx_url_parser_simple, EmptyString) {
     ngx_url_free(&url);
 }
 
+TEST(ngx_url_parser_simple, UrlWithOutProto) {
+    const char * str = "//mkaciuba.pl/path";
+
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+    ASSERT_EQ(NGX_URL_OK, status);
+
+    ASSERT_STREQ(url.scheme, NULL);
+    ASSERT_STREQ(url.host, "mkaciuba.pl");
+    ASSERT_STREQ(url.port, NULL);
+    ASSERT_STREQ(url.path, "/path");
+    ASSERT_STREQ(url.fragment, NULL);
+    ASSERT_STREQ(url.auth, NULL);
+    ngx_url_free(&url);
+}
+
+TEST(ngx_url_parser_simple, UrlWithOutProto2) {
+    const char * str = "//mkaciuba.pl";
+
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+    ASSERT_EQ(NGX_URL_OK, status);
+
+    ASSERT_STREQ(url.scheme, NULL);
+    ASSERT_STREQ(url.host, "mkaciuba.pl");
+    ASSERT_STREQ(url.port, NULL);
+    ASSERT_STREQ(url.path, NULL);
+    ASSERT_STREQ(url.fragment, NULL);
+    ASSERT_STREQ(url.auth, NULL);
+    ngx_url_free(&url);
+}
+
+TEST(ngx_url_parser_simple, PathLikeUrlWithOutProto) {
+    const char * str = "///mkaciuba.pl/path";
+
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+    ASSERT_EQ(NGX_URL_OK, status);
+
+    ASSERT_STREQ(url.scheme, NULL);
+    ASSERT_STREQ(url.host, "");
+    ASSERT_STREQ(url.port, NULL);
+    ASSERT_STREQ(url.path, "/mkaciuba.pl/path");
+    ASSERT_STREQ(url.fragment, NULL);
+    ASSERT_STREQ(url.auth, NULL);
+    ngx_url_free(&url);
+}
+
+TEST(ngx_url_parser_simple, PathWithNumbers) {
+    const char * str = "/12345";
+
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+    ASSERT_EQ(NGX_URL_OK, status);
+
+    ASSERT_STREQ(url.scheme, NULL);
+    ASSERT_STREQ(url.host, NULL);
+    ASSERT_STREQ(url.port, NULL);
+    ASSERT_STREQ(url.path, "/12345");
+    ASSERT_STREQ(url.fragment, NULL);
+    ASSERT_STREQ(url.auth, NULL);
+    ngx_url_free(&url);
+}
+
+TEST(ngx_url_parser_simple, PathWithUppercaseLetter) {
+    const char * str = "/ABCD";
+
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+    ASSERT_EQ(NGX_URL_OK, status);
+
+    ASSERT_STREQ(url.scheme, NULL);
+    ASSERT_STREQ(url.host, NULL);
+    ASSERT_STREQ(url.port, NULL);
+    ASSERT_STREQ(url.path, "/ABCD");
+    ASSERT_STREQ(url.fragment, NULL);
+    ASSERT_STREQ(url.auth, NULL);
+    ngx_url_free(&url);
+}
