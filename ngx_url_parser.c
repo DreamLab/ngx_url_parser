@@ -197,6 +197,7 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b) {
             if (c >= 'a' && c <= 'z') {
                 break;
             }
+
             switch (ch) {
                 case ':':
                     // here we have scheme
@@ -207,7 +208,7 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b) {
                     state = sw_scheme_slash;
                     break;
                 case '/':
-                    state = sw_uri;
+                    state = sw_scheme_slash_slash;
                     r->uri_start = r->url_start;
                     break;
                 case '?':
@@ -248,9 +249,21 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b) {
             break;
 
         case sw_scheme_slash_slash:
+
+            if (ch != '/' && (usual[ch >> 5] & (1 << (ch & 0x1f)))) {
+                state = sw_uri;
+                break;
+            }
+
             switch (ch) {
                 case '/':
+                    r->uri_start = NULL;
                     state = sw_host_start;
+                    break;
+                case '\0':
+                    r->uri_start = r->url_start;
+                    r->uri_end = p;
+                    goto done;
                     break;
                 default:
                     #ifdef NGX_DEBUG
