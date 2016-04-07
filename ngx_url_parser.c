@@ -260,6 +260,13 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b) {
                     r->uri_start = NULL;
                     state = sw_host_start;
                     break;
+                case '?':
+                    r->uri_end = p;
+                    if (counter <= len) {
+                        r->args_start = p + 1;
+                    }
+                    state = sw_args;
+                    break;
                 case '\0':
                     r->uri_start = r->url_start;
                     r->uri_end = p;
