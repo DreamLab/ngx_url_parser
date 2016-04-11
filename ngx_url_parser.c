@@ -273,10 +273,8 @@ int ngx_url_parser_meta(ngx_http_url_meta *r, const char *b) {
                     goto done;
                     break;
                 default:
-                    #ifdef NGX_DEBUG
-                        printf("No second slash after scheme\n");
-                    #endif
-                    return NGX_URL_INVALID;
+                    state = sw_uri;
+                    break;
                 }
             break;
 

@@ -813,6 +813,38 @@ TEST(ngx_url_parser_simple, PathSpecialChar) {
     ngx_url_free(&url);
 }
 
+TEST(ngx_url_parser_simple, PathSpecialCharTwo) {
+    const char * str = "/.^&*feed";
+
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+    ASSERT_EQ(NGX_URL_OK, status);
+
+    ASSERT_STREQ(url.scheme, NULL);
+    ASSERT_STREQ(url.host, NULL);
+    ASSERT_STREQ(url.port, NULL);
+    ASSERT_STREQ(url.path, "/.^&*feed");
+    ASSERT_STREQ(url.fragment, NULL);
+    ASSERT_STREQ(url.auth, NULL);
+    ngx_url_free(&url);
+}
+
+TEST(ngx_url_parser_simple, PathSpecialCharTwoNoSlash) {
+    const char * str = ".^&*feed";
+
+    ngx_http_url url;
+    int status = ngx_url_parser(&url, str);
+    ASSERT_EQ(NGX_URL_OK, status);
+
+    ASSERT_STREQ(url.scheme, NULL);
+    ASSERT_STREQ(url.host, NULL);
+    ASSERT_STREQ(url.port, NULL);
+    ASSERT_STREQ(url.path, ".^&*feed");
+    ASSERT_STREQ(url.fragment, NULL);
+    ASSERT_STREQ(url.auth, NULL);
+    ngx_url_free(&url);
+}
+
 TEST(ngx_url_parser_simple, QueryAfterPath) {
     const char * str = "/?from=1&to=2";
 
